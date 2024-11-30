@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Chrome } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,6 +19,16 @@ export default function Login() {
     try {
       setLoading(true);
       await signIn(email, password);
+      navigate("/");
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      await signInWithGoogle();
       navigate("/");
     } catch (error) {
       setLoading(false);
@@ -60,6 +71,16 @@ export default function Login() {
               disabled={loading}
             >
               {loading ? "Loading..." : "Login"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+            >
+              <Chrome className="mr-2 h-4 w-4" />
+              Sign in with Google
             </Button>
             <Button
               type="button"

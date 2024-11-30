@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { FileText, Layout, Printer, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const features = [
   {
     icon: FileText,
-    title: "Easy Creation",
-    description: "Design worksheets with our intuitive drag-and-drop interface",
+    title: "AI-Powered Creation",
+    description: "Create worksheets instantly with our Gemini AI assistant",
   },
   {
     icon: Layout,
@@ -21,18 +22,30 @@ const features = [
   {
     icon: Sparkles,
     title: "AI Assistant",
-    description: "Get smart suggestions for content and layout",
+    description: "Get smart suggestions for content and layout using Google's Gemini AI",
   },
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleGetStarted = () => {
+    if (user) {
+      // Navigate to worksheet creator (to be implemented)
+      navigate("/create");
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <header className="border-b bg-white/50 backdrop-blur-xl fixed top-0 w-full z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="w-6 h-6 text-primary" />
-            <span className="font-display font-semibold text-lg">TeachSheets</span>
+            <span className="font-display font-semibold text-lg">TeachSheets AI</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <Link to="#" className="text-neutral-600 hover:text-neutral-800 transition-colors">
@@ -46,12 +59,29 @@ const Index = () => {
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <button className="px-4 py-2 text-neutral-600 hover:text-neutral-800 transition-colors">
-              Sign in
-            </button>
-            <button className="px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors">
-              Get Started
-            </button>
+            {user ? (
+              <button 
+                onClick={() => navigate("/dashboard")}
+                className="px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors"
+              >
+                Dashboard
+              </button>
+            ) : (
+              <>
+                <button 
+                  onClick={() => navigate("/login")}
+                  className="px-4 py-2 text-neutral-600 hover:text-neutral-800 transition-colors"
+                >
+                  Sign in
+                </button>
+                <button 
+                  onClick={handleGetStarted}
+                  className="px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors"
+                >
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -65,19 +95,25 @@ const Index = () => {
             className="max-w-3xl mx-auto text-center"
           >
             <span className="px-4 py-2 bg-sage-100 text-sage-600 rounded-full text-sm font-medium inline-block mb-6">
-              Revolutionizing Worksheet Creation
+              Powered by Google's Gemini AI
             </span>
             <h1 className="text-5xl font-bold mb-6 leading-tight">
-              Create Beautiful Worksheets in Minutes
+              Create AI-Powered Worksheets in Minutes
             </h1>
             <p className="text-xl text-neutral-600 mb-8">
-              The ultimate tool for teachers to create, customize, and share professional worksheets. Save time and inspire learning.
+              The ultimate tool for teachers to create, customize, and share professional worksheets. Powered by advanced AI to save time and inspire learning.
             </p>
             <div className="flex items-center justify-center gap-4">
-              <button className="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors text-lg">
+              <button 
+                onClick={handleGetStarted}
+                className="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-hover transition-colors text-lg"
+              >
                 Create Worksheet
               </button>
-              <button className="px-8 py-3 border border-neutral-200 rounded-full hover:bg-neutral-50 transition-colors text-lg">
+              <button 
+                onClick={() => navigate("/templates")}
+                className="px-8 py-3 border border-neutral-200 rounded-full hover:bg-neutral-50 transition-colors text-lg"
+              >
                 View Templates
               </button>
             </div>
