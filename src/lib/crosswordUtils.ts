@@ -48,15 +48,22 @@ export const canPlaceWord = (grid: string[][], word: string, pos: Position): boo
     
     // Check adjacent cells (no words should touch except at intersections)
     if (pos.horizontal) {
-      if (y > 0 && grid[y-1][x] !== '' && i !== newIndex) return false;
-      if (y < grid.length - 1 && grid[y+1][x] !== '' && i !== newIndex) return false;
+      // Check cells above and below
+      if (y > 0 && grid[y-1][x] !== '' && !hasIntersectionAt(grid, x, y)) return false;
+      if (y < grid.length - 1 && grid[y+1][x] !== '' && !hasIntersectionAt(grid, x, y)) return false;
     } else {
-      if (x > 0 && grid[y][x-1] !== '' && i !== newIndex) return false;
-      if (x < grid[0].length - 1 && grid[y][x+1] !== '' && i !== newIndex) return false;
+      // Check cells to the left and right
+      if (x > 0 && grid[y][x-1] !== '' && !hasIntersectionAt(grid, x, y)) return false;
+      if (x < grid[0].length - 1 && grid[y][x+1] !== '' && !hasIntersectionAt(grid, x, y)) return false;
     }
   }
   
   return true;
+};
+
+// Helper function to check if there's a valid intersection at the given position
+const hasIntersectionAt = (grid: string[][], x: number, y: number): boolean => {
+  return grid[y][x] !== '';
 };
 
 export const placeWord = (grid: string[][], word: string, pos: Position): void => {
