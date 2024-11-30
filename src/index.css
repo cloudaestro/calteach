@@ -32,3 +32,20 @@
     text-wrap: balance;
   }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print\\:block,
+  .print\\:block * {
+    visibility: visible;
+  }
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+  body {
+    background: white;
+  }
+}

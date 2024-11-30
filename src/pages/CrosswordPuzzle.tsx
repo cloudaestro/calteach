@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CrosswordCell } from "@/components/CrosswordCell";
 import { CrosswordClues } from "@/components/CrosswordClues";
+import { PrintableView } from "@/components/PrintableView";
 import { useToast } from "@/hooks/use-toast";
+import { Printer } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -90,6 +92,10 @@ const CrosswordPuzzle = () => {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   if (!crosswordData) {
     return <div>Loading...</div>;
   }
@@ -104,6 +110,10 @@ const CrosswordPuzzle = () => {
               <div className="space-x-2">
                 <Button variant="outline" onClick={() => navigate("/crossword")}>
                   Create New Puzzle
+                </Button>
+                <Button variant="outline" onClick={handlePrint}>
+                  <Printer className="w-4 h-4 mr-2" />
+                  Print
                 </Button>
                 <Sheet>
                   <SheetTrigger asChild>
@@ -192,6 +202,11 @@ const CrosswordPuzzle = () => {
             <CrosswordClues placedWords={crosswordData.placedWords} />
           </CardContent>
         </Card>
+
+        <PrintableView
+          grid={crosswordData.grid}
+          placedWords={crosswordData.placedWords}
+        />
       </div>
     </div>
   );
