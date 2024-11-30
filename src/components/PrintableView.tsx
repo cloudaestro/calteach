@@ -13,12 +13,14 @@ interface PrintableViewProps {
 
 export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
   return (
-    <div className="print:block hidden p-8 relative min-h-[297mm] bg-white">
+    <div className="print:block hidden p-8 relative min-h-[297mm] w-[210mm] mx-auto bg-white">
       {/* Watermark */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 rotate-[-45deg] text-4xl text-gray-400 font-bold">
-        CROSSWORD PUZZLE
-        <br />
-        FREE VERSION
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 rotate-[-45deg] text-4xl text-gray-400 font-bold select-none">
+        <div className="whitespace-nowrap text-center">
+          CROSSWORD PUZZLE
+          <br />
+          FREE VERSION
+        </div>
       </div>
 
       <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
