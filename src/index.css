@@ -45,6 +45,7 @@
   /* Hide everything except printable content */
   body * {
     visibility: hidden !important;
+    display: none !important;
   }
   
   .print\:block,
@@ -55,10 +56,12 @@
   
   /* Force background and colors for printing */
   .print\:block {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    page-break-after: avoid !important;
   }
 
   /* Ensure watermark prints */
