@@ -37,55 +37,66 @@ export const generateCrossword = (words: string[]) => {
     });
   }
 
-  // Try to place remaining words with better intersection strategy
+  // Try multiple starting positions for better word placement
   for (let i = 1; i < sortedWords.length; i++) {
     const word = sortedWords[i];
     let bestPlacement: { pos: Position; intersections: number } | null = null;
-
-    // Try all possible placements and find the one with most intersections
+    
+    // Try each placed word as an anchor point
     for (const placedWord of placedWords) {
       const intersections = findIntersections(word, placedWord.word);
       
       for (const [newWordIndex, placedWordIndex] of intersections) {
-        const pos = calculatePosition(
-          placedWord.position,
-          placedWordIndex,
-          newWordIndex,
-          word.length,
-          !placedWord.position.horizontal
-        );
+        // Try both horizontal and vertical orientations
+        const orientations = [true, false];
+        
+        for (const horizontal of orientations) {
+          const pos = calculatePosition(
+            placedWord.position,
+            placedWordIndex,
+            newWordIndex,
+            word.length,
+            horizontal
+          );
 
-        if (pos && canPlaceWord(grid, word, pos)) {
-          // Count how many letters this placement would share with existing words
-          const intersectionCount = countIntersections(grid, word, pos);
-          
-          if (!bestPlacement || intersectionCount > bestPlacement.intersections) {
-            bestPlacement = { pos, intersections: intersectionCount };
+          if (pos && canPlaceWord(grid, word, pos)) {
+            const intersectionCount = countIntersections(grid, word, pos);
+            if (!bestPlacement || intersectionCount > bestPlacement.intersections) {
+              bestPlacement = { pos, intersections: intersectionCount };
+            }
           }
         }
       }
     }
     
-    // Place the word using the best placement found
+    // If no placement found with intersections, try placing adjacent to existing words
+    if (!bestPlacement) {
+      for (const placedWord of placedWords) {
+        const adjacentPositions = findAdjacentPositions(grid, placedWord, word.length);
+        for (const pos of adjacentPositions) {
+          if (canPlaceWord(grid, word, pos)) {
+            bestPlacement = { pos, intersections: 0 };
+            break;
+          }
+        }
+        if (bestPlacement) break;
+      }
+    }
+    
+    // Place the word if a valid position was found
     if (bestPlacement) {
       placeWord(grid, word, bestPlacement.pos);
-      placedWords.push({ 
-        word, 
-        position: bestPlacement.pos, 
-        number: clueNumber++ 
+      placedWords.push({
+        word,
+        position: bestPlacement.pos,
+        number: clueNumber++
       });
     }
   }
 
-  // Clean up the grid by removing any isolated words
-  const finalPlacedWords = placedWords.filter(word => {
-    const intersectionCount = countIntersections(grid, word.word, word.position);
-    return intersectionCount > 1; // Keep only words with more than one intersection
-  });
-
   return {
     grid,
-    placedWords: finalPlacedWords,
+    placedWords,
     size: gridSize
   };
 };
@@ -120,18 +131,19 @@ function calculatePosition(
     y += existingIndex;
   }
 
+  // Ensure position is within grid bounds
+  if (x < 0 || y < 0) return null;
+
   return { x, y, horizontal };
 }
 
 function canPlaceWord(grid: string[][], word: string, pos: Position): boolean {
-  // Check boundaries
   if (pos.x < 0 || pos.y < 0 || 
       (pos.horizontal && pos.x + word.length > grid[0].length) ||
       (!pos.horizontal && pos.y + word.length > grid.length)) {
     return false;
   }
 
-  // Check for conflicts and ensure proper spacing
   for (let i = -1; i <= word.length; i++) {
     for (let j = -1; j <= 1; j++) {
       const x = pos.horizontal ? pos.x + i : pos.x + j;
@@ -145,16 +157,12 @@ function canPlaceWord(grid: string[][], word: string, pos: Position): boolean {
           if (currentCell !== '' && currentCell !== word[i]) {
             return false;
           }
-        } else {
-          // Ensure words don't touch except at intersections
-          if (currentCell !== '') {
-            return false;
-          }
+        } else if (currentCell !== '') {
+          return false;
         }
       }
     }
   }
-
   return true;
 }
 
@@ -166,22 +174,30 @@ function placeWord(grid: string[][], word: string, pos: Position) {
   }
 }
 
+function findAdjacentPositions(grid: string[][], placedWord: PlacedWord, newWordLength: number): Position[] {
+  const positions: Position[] = [];
+  const { x, y, horizontal } = placedWord.position;
+  
+  if (horizontal) {
+    // Try placing vertically adjacent to the word
+    if (y > 0) positions.push({ x, y: y - newWordLength + 1, horizontal: false });
+    if (y < grid.length - 1) positions.push({ x, y: y + 1, horizontal: false });
+  } else {
+    // Try placing horizontally adjacent to the word
+    if (x > 0) positions.push({ x: x - newWordLength + 1, y, horizontal: true });
+    if (x < grid[0].length - 1) positions.push({ x: x + 1, y, horizontal: true });
+  }
+  
+  return positions;
+}
+
 function countIntersections(grid: string[][], word: string, pos: Position): number {
   let count = 0;
   for (let i = 0; i < word.length; i++) {
     const x = pos.horizontal ? pos.x + i : pos.x;
     const y = pos.horizontal ? pos.y : pos.y + i;
     
-    // Check perpendicular cells
-    const checkX = pos.horizontal ? x : x + 1;
-    const checkY = pos.horizontal ? y + 1 : y;
-    if (checkY < grid.length && checkX < grid[0].length && grid[checkY][checkX] !== '') {
-      count++;
-    }
-    
-    const checkX2 = pos.horizontal ? x : x - 1;
-    const checkY2 = pos.horizontal ? y - 1 : y;
-    if (checkY2 >= 0 && checkX2 >= 0 && grid[checkY2][checkX2] !== '') {
+    if (grid[y][x] !== '' && grid[y][x] === word[i]) {
       count++;
     }
   }
