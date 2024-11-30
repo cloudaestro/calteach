@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { generateWorksheet } from "@/lib/gemini";
+import { generateCrossword } from "@/lib/crosswordGenerator";
 
 type WordGenerationMode = "ai" | "custom";
 
@@ -15,19 +16,32 @@ const CrosswordWorksheet = () => {
   const [customWords, setCustomWords] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedWords, setGeneratedWords] = useState<string[]>([]);
+  const [crosswordData, setCrosswordData] = useState<{
+    grid: string[][];
+    placedWords: Array<{
+      word: string;
+      position: { x: number; y: number; horizontal: boolean };
+      number: number;
+    }>;
+    size: number;
+  } | null>(null);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
+      let words: string[] = [];
       if (mode === "ai") {
         const prompt = `Generate 10 English words related to the topic: ${topic}. Return only the words separated by commas, no explanations.`;
         const response = await generateWorksheet(prompt);
-        const words = response.split(",").map(word => word.trim());
-        setGeneratedWords(words);
+        words = response.split(",").map(word => word.trim());
       } else {
-        const words = customWords.split(",").map(word => word.trim());
-        setGeneratedWords(words);
+        words = customWords.split(",").map(word => word.trim());
       }
+      setGeneratedWords(words);
+      
+      // Generate crossword puzzle
+      const crossword = generateCrossword(words);
+      setCrosswordData(crossword);
     } catch (error) {
       console.error("Error generating crossword:", error);
     } finally {
@@ -90,11 +104,62 @@ const CrosswordWorksheet = () => {
               {isGenerating ? "Generating..." : "Generate Crossword"}
             </Button>
 
-            {generatedWords.length > 0 && (
-              <div className="mt-4">
-                <h3 className="font-medium mb-2">Generated Words:</h3>
-                <div className="bg-white p-4 rounded-lg border">
-                  {generatedWords.join(", ")}
+            {crosswordData && (
+              <div className="mt-8">
+                <h3 className="font-medium mb-4">Generated Crossword:</h3>
+                <div className="grid gap-px bg-neutral-200 w-fit mx-auto">
+                  {crosswordData.grid.map((row, y) => (
+                    <div key={y} className="flex">
+                      {row.map((cell, x) => {
+                        const number = crosswordData.placedWords.find(
+                          word => word.position.x === x && word.position.y === y
+                        )?.number;
+
+                        return (
+                          <div
+                            key={`${x}-${y}`}
+                            className={`w-8 h-8 relative flex items-center justify-center ${
+                              cell ? 'bg-white' : 'bg-neutral-800'
+                            }`}
+                          >
+                            {number && (
+                              <span className="absolute top-0 left-0 text-[8px] p-[2px]">
+                                {number}
+                              </span>
+                            )}
+                            {cell && <span className="text-sm">{cell}</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Across:</h4>
+                    <ul className="space-y-1">
+                      {crosswordData.placedWords
+                        .filter(word => word.position.horizontal)
+                        .map(word => (
+                          <li key={word.number} className="text-sm">
+                            {word.number}. {word.word}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">Down:</h4>
+                    <ul className="space-y-1">
+                      {crosswordData.placedWords
+                        .filter(word => !word.position.horizontal)
+                        .map(word => (
+                          <li key={word.number} className="text-sm">
+                            {word.number}. {word.word}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}
