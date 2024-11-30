@@ -9,8 +9,10 @@ interface CrosswordCellProps {
   correctValue: string;
   isWordChecked: boolean;
   showSolution: boolean;
+  isPartOfCurrentWord?: boolean;
   onChange: (value: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onFocus?: () => void;
 }
 
 export const CrosswordCell = ({
@@ -19,13 +21,18 @@ export const CrosswordCell = ({
   correctValue,
   isWordChecked,
   showSolution,
+  isPartOfCurrentWord,
   onChange,
-  onKeyDown
+  onKeyDown,
+  onFocus
 }: CrosswordCellProps) => {
   const isCorrect = value.toLowerCase() === correctValue.toLowerCase();
   
   return (
-    <div className="w-8 h-8 relative bg-white border border-neutral-300">
+    <div className={cn(
+      "w-8 h-8 relative bg-white border border-neutral-300",
+      isPartOfCurrentWord && "bg-blue-50"
+    )}>
       {number && (
         <span className="absolute top-0 left-0 text-[8px] p-[2px]">
           {number}
@@ -42,6 +49,7 @@ export const CrosswordCell = ({
         value={showSolution && !value ? correctValue : value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={onKeyDown}
+        onFocus={onFocus}
       />
     </div>
   );

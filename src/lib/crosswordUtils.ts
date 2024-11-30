@@ -4,7 +4,7 @@ export const findIntersections = (word1: string, word2: string): [number, number
   const intersections: [number, number][] = [];
   for (let i = 0; i < word1.length; i++) {
     for (let j = 0; j < word2.length; j++) {
-      if (word1[i] === word2[j]) {
+      if (word1[i].toLowerCase() === word2[j].toLowerCase()) {
         intersections.push([i, j]);
       }
     }
@@ -42,7 +42,6 @@ export const canPlaceWord = (grid: string[][], word: string, pos: Position): boo
     return false;
   }
 
-  // Check surrounding cells to ensure words don't touch unless at intersections
   for (let i = -1; i <= word.length; i++) {
     for (let j = -1; j <= 1; j++) {
       const x = pos.horizontal ? pos.x + i : pos.x + j;
@@ -53,7 +52,7 @@ export const canPlaceWord = (grid: string[][], word: string, pos: Position): boo
         const currentCell = grid[y][x];
         
         if (isWordPosition) {
-          if (currentCell !== '' && currentCell !== word[i]) {
+          if (currentCell !== '' && currentCell.toLowerCase() !== word[i].toLowerCase()) {
             return false;
           }
         } else if (currentCell !== '') {
@@ -79,7 +78,7 @@ export const countIntersections = (grid: string[][], word: string, pos: Position
     const x = pos.horizontal ? pos.x + i : pos.x;
     const y = pos.horizontal ? pos.y : pos.y + i;
     
-    if (grid[y][x] !== '' && grid[y][x] === word[i]) {
+    if (grid[y][x] !== '' && grid[y][x].toLowerCase() === word[i].toLowerCase()) {
       count++;
     }
   }
@@ -94,16 +93,37 @@ export const findAdjacentPositions = (
   const positions: Position[] = [];
   const { x, y, horizontal } = placedWord.position;
   
-  // Try both horizontal and vertical positions for better word placement
   if (horizontal) {
-    // Try placing vertically
-    if (y > 0) positions.push({ x, y: y - newWordLength + 1, horizontal: false });
+    // Try placing vertically at start and end
+    if (y > newWordLength - 1) positions.push({ x, y: y - newWordLength + 1, horizontal: false });
     if (y < grid.length - 1) positions.push({ x, y: y + 1, horizontal: false });
+    // Try placing vertically at each intersection point
+    for (let i = 0; i < placedWord.word.length; i++) {
+      positions.push({ x: x + i, y: y - newWordLength + 1, horizontal: false });
+    }
   } else {
-    // Try placing horizontally
-    if (x > 0) positions.push({ x: x - newWordLength + 1, y, horizontal: true });
+    // Try placing horizontally at start and end
+    if (x > newWordLength - 1) positions.push({ x: x - newWordLength + 1, y, horizontal: true });
     if (x < grid[0].length - 1) positions.push({ x: x + 1, y, horizontal: true });
+    // Try placing horizontally at each intersection point
+    for (let i = 0; i < placedWord.word.length; i++) {
+      positions.push({ x: x - newWordLength + 1, y: y + i, horizontal: true });
+    }
   }
   
   return positions;
+};
+
+export const getWordCells = (word: string, position: Position): { x: number; y: number }[] => {
+  const cells = [];
+  for (let i = 0; i < word.length; i++) {
+    const x = position.horizontal ? position.x + i : position.x;
+    const y = position.horizontal ? position.y : position.y + i;
+    cells.push({ x, y });
+  }
+  return cells;
+};
+
+export const getCellsForWord = (placedWord: { word: string; position: Position }) => {
+  return getWordCells(placedWord.word, placedWord.position);
 };

@@ -31,6 +31,8 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
   }
 
   // Enhanced word placement with alternating orientations
+  let preferHorizontal = false; // Toggle between horizontal and vertical placements
+  
   for (let i = 1; i < sortedWords.length; i++) {
     const word = sortedWords[i];
     let bestPlacement: { pos: Position; intersections: number } | null = null;
@@ -39,11 +41,12 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
     for (const placedWord of placedWords) {
       const intersections = findIntersections(word, placedWord.word);
       
-      // Try both orientations for better coverage
-      for (const [newWordIndex, placedWordIndex] of intersections) {
-        const orientations = [!placedWord.position.horizontal, placedWord.position.horizontal];
-        
-        for (const horizontal of orientations) {
+      // Try both orientations with preference
+      const orientations = [!placedWord.position.horizontal, placedWord.position.horizontal];
+      if (preferHorizontal) orientations.reverse();
+      
+      for (const horizontal of orientations) {
+        for (const [newWordIndex, placedWordIndex] of intersections) {
           const pos = calculatePosition(
             placedWord.position,
             placedWordIndex,
@@ -84,29 +87,30 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
         position: bestPlacement.pos,
         number: clueNumber++
       });
+      preferHorizontal = !preferHorizontal; // Toggle preference for next word
     }
   }
 
   // Generate detailed descriptions for the placed words
-  const wordsWithDescriptions = placedWords.map(async (placedWord) => {
-    const descriptionPrompt = `Generate a detailed, specific clue for the word "${placedWord.word}" that would be suitable for a crossword puzzle. The clue should be challenging but fair, and should focus on the word's primary meaning or most common usage. Make it specific enough that the answer could only be "${placedWord.word}".`;
-    try {
-      const description = await generateWorksheet(descriptionPrompt);
-      return {
-        ...placedWord,
-        description: description.trim()
-      };
-    } catch (error) {
-      console.error('Error generating description:', error);
-      return placedWord;
-    }
-  });
-
-  const enhancedPlacedWords = await Promise.all(wordsWithDescriptions);
+  const wordsWithDescriptions = await Promise.all(
+    placedWords.map(async (placedWord) => {
+      const descriptionPrompt = `Generate a detailed, specific clue for the word "${placedWord.word}" that would be suitable for a crossword puzzle. The clue should be challenging but fair, and should focus on the word's primary meaning or most common usage.`;
+      try {
+        const description = await generateWorksheet(descriptionPrompt);
+        return {
+          ...placedWord,
+          description: description.trim()
+        };
+      } catch (error) {
+        console.error('Error generating description:', error);
+        return placedWord;
+      }
+    })
+  );
 
   return {
     grid,
-    placedWords: enhancedPlacedWords,
+    placedWords: wordsWithDescriptions,
     size: gridSize
   };
 };
