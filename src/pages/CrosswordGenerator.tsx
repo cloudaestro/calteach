@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { generateWorksheet } from "@/lib/gemini";
 import { generateCrossword } from "@/lib/crosswordGenerator";
 
 type WordGenerationMode = "ai" | "custom";
+type DifficultyLevel = "easy" | "medium" | "hard";
 
 const CrosswordGenerator = () => {
   const navigate = useNavigate();
@@ -15,6 +17,21 @@ const CrosswordGenerator = () => {
   const [topic, setTopic] = useState("");
   const [customWords, setCustomWords] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
+  const [wordCount, setWordCount] = useState(10);
+
+  const getDifficultyPrompt = (difficulty: DifficultyLevel) => {
+    switch (difficulty) {
+      case "easy":
+        return "simple and common";
+      case "medium":
+        return "moderate complexity";
+      case "hard":
+        return "challenging and sophisticated";
+      default:
+        return "moderate complexity";
+    }
+  };
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -23,15 +40,16 @@ const CrosswordGenerator = () => {
       let descriptions: string[] = [];
       
       if (mode === "ai") {
-        const wordsPrompt = `Generate 10 English words related to the topic: ${topic}. Return only the words separated by commas, no explanations.`;
+        const difficultyDesc = getDifficultyPrompt(difficulty);
+        const wordsPrompt = `Generate ${wordCount} ${difficultyDesc} English words related to the topic: ${topic}. Return only the words separated by commas, no explanations.`;
         const wordsResponse = await generateWorksheet(wordsPrompt);
-        words = wordsResponse.split(",").map(word => word.trim());
+        words = wordsResponse.split(",").map(word => word.trim()).slice(0, wordCount);
         
         const descriptionsPrompt = `Generate short, one-line descriptions for these words related to ${topic}: ${words.join(", ")}. Return only the descriptions separated by semicolons, in the same order as the words.`;
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
-        words = customWords.split(",").map(word => word.trim());
+        words = customWords.split(",").map(word => word.trim()).slice(0, wordCount);
         descriptions = words.map(word => `Enter the word that means: ${word}`);
       }
 
@@ -41,17 +59,15 @@ const CrosswordGenerator = () => {
         description: descriptions[words.indexOf(word.word)] || `Enter: ${word.word}`
       }));
 
-      // Generate a unique ID (timestamp + random string)
       const puzzleId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Store the puzzle data in localStorage (in a real app, this would be in a database)
       localStorage.setItem(`crossword-${puzzleId}`, JSON.stringify({
         grid: crossword.grid,
         placedWords: crossword.placedWords,
-        size: crossword.size
+        size: crossword.size,
+        difficulty,
+        topic: mode === "ai" ? topic : "Custom Words"
       }));
 
-      // Navigate to the puzzle page
       navigate(`/crossword/${puzzleId}`);
     } catch (error) {
       console.error("Error generating crossword:", error);
@@ -70,7 +86,7 @@ const CrosswordGenerator = () => {
               Generate a crossword puzzle with AI-generated words or your custom words
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium">Generation Mode</label>
               <Select value={mode} onValueChange={(value: WordGenerationMode) => setMode(value)}>
@@ -82,6 +98,32 @@ const CrosswordGenerator = () => {
                   <SelectItem value="custom">Custom Words</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Difficulty Level</label>
+              <Select value={difficulty} onValueChange={(value: DifficultyLevel) => setDifficulty(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select difficulty" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="easy">Easy</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Number of Words: {wordCount}</label>
+              <Slider
+                value={[wordCount]}
+                onValueChange={(value) => setWordCount(value[0])}
+                min={5}
+                max={15}
+                step={1}
+                className="w-full"
+              />
             </div>
 
             {mode === "ai" ? (
