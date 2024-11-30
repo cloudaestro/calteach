@@ -31,7 +31,8 @@ export const CrosswordCell = ({
   return (
     <div className={cn(
       "w-8 h-8 relative bg-white border border-neutral-300",
-      isPartOfCurrentWord && "bg-blue-50"
+      isPartOfCurrentWord && "bg-blue-50",
+      isWordChecked && (isCorrect ? "bg-green-100" : "bg-red-100")
     )}>
       {number && (
         <span className="absolute top-0 left-0 text-[8px] p-[2px]">
@@ -42,8 +43,8 @@ export const CrosswordCell = ({
         type="text"
         maxLength={1}
         className={cn(
-          "w-full h-full text-center uppercase bg-transparent focus:outline-none",
-          isWordChecked && (isCorrect ? "bg-green-200" : "bg-red-200"),
+          "w-full h-full text-center uppercase bg-transparent focus:outline-none transition-colors duration-200",
+          isWordChecked && (isCorrect ? "text-green-700" : "text-red-700"),
           showSolution && !value && "text-gray-500"
         )}
         value={showSolution && !value ? correctValue : value}
