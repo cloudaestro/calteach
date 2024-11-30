@@ -5,6 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CrosswordCell } from "@/components/CrosswordCell";
 import { CrosswordClues } from "@/components/CrosswordClues";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 interface PlacedWord {
   word: string;
@@ -29,6 +36,7 @@ const CrosswordPuzzle = () => {
   const { toast } = useToast();
   const [crosswordData, setCrosswordData] = useState<CrosswordData | null>(null);
   const [userInputs, setUserInputs] = useState<{ [key: string]: string }>({});
+  const [checkedWords, setCheckedWords] = useState<{ [key: number]: boolean }>({});
   const [showSolution, setShowSolution] = useState(false);
 
   useEffect(() => {
@@ -46,47 +54,39 @@ const CrosswordPuzzle = () => {
     }));
   };
 
-  const checkAnswers = () => {
+  const checkWord = (wordNumber: number) => {
     if (!crosswordData) return;
+    
+    const word = crosswordData.placedWords.find(w => w.number === wordNumber);
+    if (!word) return;
 
-    let allCorrect = true;
-    let totalAnswered = 0;
-
-    crosswordData.placedWords.forEach(word => {
-      for (let i = 0; i < word.word.length; i++) {
-        const key = `${word.number}-${i}`;
-        const userInput = userInputs[key]?.toLowerCase() || '';
-        const correctLetter = word.word[i].toLowerCase();
-        
-        if (userInput) {
-          totalAnswered++;
-        }
-        
-        if (userInput !== correctLetter) {
-          allCorrect = false;
-        }
+    let isCorrect = true;
+    for (let i = 0; i < word.word.length; i++) {
+      const key = `${wordNumber}-${i}`;
+      const userInput = userInputs[key]?.toLowerCase() || '';
+      const correctLetter = word.word[i].toLowerCase();
+      
+      if (userInput !== correctLetter) {
+        isCorrect = false;
+        break;
       }
-    });
-
-    setShowSolution(true);
-
-    if (allCorrect && totalAnswered === crosswordData.placedWords.reduce((acc, word) => acc + word.word.length, 0)) {
-      toast({
-        title: "Perfect!",
-        description: "All answers are correct! 🎉",
-      });
-    } else {
-      toast({
-        title: "Keep trying!",
-        description: "Some answers are incorrect. Correct answers are shown in green.",
-        variant: "destructive",
-      });
     }
+
+    setCheckedWords(prev => ({
+      ...prev,
+      [wordNumber]: true
+    }));
+
+    toast({
+      title: isCorrect ? "Correct!" : "Try again!",
+      description: isCorrect ? "Well done!" : "Keep trying, you can do it!",
+      variant: isCorrect ? "default" : "destructive",
+    });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (wordNumber: number, e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      checkAnswers();
+      checkWord(wordNumber);
     }
   };
 
@@ -105,9 +105,24 @@ const CrosswordPuzzle = () => {
                 <Button variant="outline" onClick={() => navigate("/crossword")}>
                   Create New Puzzle
                 </Button>
-                <Button onClick={checkAnswers}>
-                  Check Answers
-                </Button>
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline">Show Answers</Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Answers</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      {crosswordData.placedWords.map((word, index) => (
+                        <div key={index} className="mb-2">
+                          <span className="font-bold">{word.number}. </span>
+                          <span>{word.word}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
 
@@ -156,6 +171,7 @@ const CrosswordPuzzle = () => {
                         number={number}
                         value={userInputs[inputKey] || ''}
                         correctValue={correctLetter}
+                        isWordChecked={placedWord ? checkedWords[placedWord.number] : false}
                         showSolution={showSolution}
                         onChange={(value) => {
                           if (placedWord) {
@@ -165,7 +181,7 @@ const CrosswordPuzzle = () => {
                             handleInputChange(placedWord.number, index, value);
                           }
                         }}
-                        onKeyDown={handleKeyDown}
+                        onKeyDown={(e) => placedWord && handleKeyDown(placedWord.number, e)}
                       />
                     );
                   })}

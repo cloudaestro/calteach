@@ -7,6 +7,7 @@ interface CrosswordCellProps {
   number?: number;
   value: string;
   correctValue: string;
+  isWordChecked: boolean;
   showSolution: boolean;
   onChange: (value: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
@@ -16,6 +17,7 @@ export const CrosswordCell = ({
   number,
   value,
   correctValue,
+  isWordChecked,
   showSolution,
   onChange,
   onKeyDown
@@ -34,7 +36,8 @@ export const CrosswordCell = ({
         maxLength={1}
         className={cn(
           "w-full h-full text-center uppercase bg-transparent focus:outline-none",
-          showSolution && (isCorrect ? "text-green-600" : "text-red-600")
+          isWordChecked && (isCorrect ? "bg-green-200" : "bg-red-200"),
+          showSolution && !value && "text-gray-500"
         )}
         value={showSolution && !value ? correctValue : value}
         onChange={(e) => onChange(e.target.value)}
