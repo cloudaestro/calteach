@@ -9,7 +9,8 @@ const worksheetTypes = [
     title: "Crossword",
     description: "Create engaging crossword puzzles",
     icon: Grid,
-    comingSoon: true
+    path: "/crossword",
+    comingSoon: false
   },
   {
     title: "Word Find",
@@ -52,6 +53,12 @@ const Dashboard = () => {
     return null;
   }
 
+  const handleWorksheetClick = (type: typeof worksheetTypes[0]) => {
+    if (!type.comingSoon && type.path) {
+      navigate(type.path);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50">
       <header className="border-b bg-white/50 backdrop-blur-xl">
@@ -78,7 +85,10 @@ const Dashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
-                <Card className="relative overflow-hidden hover:shadow-lg transition-shadow">
+                <Card 
+                  className={`relative overflow-hidden transition-shadow ${!type.comingSoon ? 'hover:shadow-lg cursor-pointer' : ''}`}
+                  onClick={() => handleWorksheetClick(type)}
+                >
                   {type.comingSoon && (
                     <div className="absolute top-2 right-2 bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium">
                       Coming Soon
@@ -94,7 +104,7 @@ const Dashboard = () => {
                   <CardContent>
                     <button 
                       disabled={type.comingSoon}
-                      className="w-full px-4 py-2 bg-primary text-white rounded-lg opacity-50 cursor-not-allowed"
+                      className={`w-full px-4 py-2 bg-primary text-white rounded-lg ${type.comingSoon ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}
                     >
                       Create Worksheet
                     </button>
