@@ -35,33 +35,32 @@ const CrosswordWorksheet = () => {
       let descriptions: string[] = [];
       
       if (mode === "ai") {
-        // Generate words
         const wordsPrompt = `Generate 10 English words related to the topic: ${topic}. Return only the words separated by commas, no explanations.`;
         const wordsResponse = await generateWorksheet(wordsPrompt);
         words = wordsResponse.split(",").map(word => word.trim());
         
-        // Generate descriptions for each word
         const descriptionsPrompt = `Generate short, one-line descriptions for these words related to ${topic}: ${words.join(", ")}. Return only the descriptions separated by semicolons, in the same order as the words.`;
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
         words = customWords.split(",").map(word => word.trim());
-        // For custom words, generate simple descriptions
         descriptions = words.map(word => `Enter the word that means: ${word}`);
       }
       
       setGeneratedWords(words);
       
-      // Generate crossword puzzle with descriptions
-      const crossword = generateCrossword(words);
-      // Add descriptions to placed words
-      crossword.placedWords = crossword.placedWords.map((word, index) => ({
+      const crosswordResult = await generateCrossword(words);
+      const enhancedPlacedWords = crosswordResult.placedWords.map((word, index) => ({
         ...word,
         description: descriptions[words.indexOf(word.word)] || `Enter: ${word.word}`
       }));
       
-      setCrosswordData(crossword);
-      // Initialize user inputs
+      setCrosswordData({
+        grid: crosswordResult.grid,
+        placedWords: enhancedPlacedWords,
+        size: crosswordResult.size
+      });
+      
       setUserInputs({});
     } catch (error) {
       console.error("Error generating crossword:", error);

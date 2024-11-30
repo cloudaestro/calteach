@@ -41,12 +41,10 @@ const CrosswordGenerator = () => {
       
       if (mode === "ai") {
         const difficultyDesc = getDifficultyPrompt(difficulty);
-        // Modified prompt to get more specific words
         const wordsPrompt = `Generate ${wordCount} ${difficultyDesc} ${topic}. Return only the specific names separated by commas, no explanations or descriptions. For example, if the topic is "Animals", return "lion, tiger, elephant" etc.`;
         const wordsResponse = await generateWorksheet(wordsPrompt);
         words = wordsResponse.split(",").map(word => word.trim()).slice(0, wordCount);
         
-        // Modified prompt to get more direct descriptions
         const descriptionsPrompt = `For each of these ${topic}: ${words.join(", ")}, generate a simple, direct description that clearly identifies what it is. Each description should start with "A/An" and be factual. For example: "A large African cat with a mane" for lion. Return only the descriptions separated by semicolons, in the same order as the words.`;
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
@@ -55,17 +53,17 @@ const CrosswordGenerator = () => {
         descriptions = words.map(word => `Enter the word that means: ${word}`);
       }
 
-      const crossword = generateCrossword(words);
-      crossword.placedWords = crossword.placedWords.map((word, index) => ({
+      const crosswordResult = await generateCrossword(words);
+      const enhancedPlacedWords = crosswordResult.placedWords.map((word, index) => ({
         ...word,
         description: descriptions[words.indexOf(word.word)] || `Enter: ${word.word}`
       }));
 
       const puzzleId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       localStorage.setItem(`crossword-${puzzleId}`, JSON.stringify({
-        grid: crossword.grid,
-        placedWords: crossword.placedWords,
-        size: crossword.size,
+        grid: crosswordResult.grid,
+        placedWords: enhancedPlacedWords,
+        size: crosswordResult.size,
         difficulty,
         topic: mode === "ai" ? topic : "Custom Words"
       }));
