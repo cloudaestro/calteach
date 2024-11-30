@@ -37,12 +37,12 @@ export const generateCrossword = (words: string[]) => {
     });
   }
 
-  // Try to place remaining words
+  // Try to place remaining words with better intersection strategy
   for (let i = 1; i < sortedWords.length; i++) {
     const word = sortedWords[i];
-    let placed = false;
+    let bestPlacement: { pos: Position; intersections: number } | null = null;
 
-    // Try to find intersections with placed words
+    // Try all possible placements and find the one with most intersections
     for (const placedWord of placedWords) {
       const intersections = findIntersections(word, placedWord.word);
       
@@ -56,27 +56,42 @@ export const generateCrossword = (words: string[]) => {
         );
 
         if (pos && canPlaceWord(grid, word, pos)) {
-          placeWord(grid, word, pos);
-          placedWords.push({ word, position: pos, number: clueNumber++ });
-          placed = true;
-          break;
+          // Count how many letters this placement would share with existing words
+          const intersectionCount = countIntersections(grid, word, pos);
+          
+          if (!bestPlacement || intersectionCount > bestPlacement.intersections) {
+            bestPlacement = { pos, intersections: intersectionCount };
+          }
         }
       }
-      
-      if (placed) break;
+    }
+    
+    // Place the word using the best placement found
+    if (bestPlacement) {
+      placeWord(grid, word, bestPlacement.pos);
+      placedWords.push({ 
+        word, 
+        position: bestPlacement.pos, 
+        number: clueNumber++ 
+      });
     }
   }
 
+  // Clean up the grid by removing any isolated words
+  const finalPlacedWords = placedWords.filter(word => {
+    const intersectionCount = countIntersections(grid, word.word, word.position);
+    return intersectionCount > 1; // Keep only words with more than one intersection
+  });
+
   return {
     grid,
-    placedWords,
+    placedWords: finalPlacedWords,
     size: gridSize
   };
 };
 
 function findIntersections(word1: string, word2: string): [number, number][] {
   const intersections: [number, number][] = [];
-  
   for (let i = 0; i < word1.length; i++) {
     for (let j = 0; j < word2.length; j++) {
       if (word1[i] === word2[j]) {
@@ -84,7 +99,6 @@ function findIntersections(word1: string, word2: string): [number, number][] {
       }
     }
   }
-  
   return intersections;
 }
 
@@ -110,18 +124,34 @@ function calculatePosition(
 }
 
 function canPlaceWord(grid: string[][], word: string, pos: Position): boolean {
+  // Check boundaries
   if (pos.x < 0 || pos.y < 0 || 
       (pos.horizontal && pos.x + word.length > grid[0].length) ||
       (!pos.horizontal && pos.y + word.length > grid.length)) {
     return false;
   }
 
-  for (let i = 0; i < word.length; i++) {
-    const x = pos.horizontal ? pos.x + i : pos.x;
-    const y = pos.horizontal ? pos.y : pos.y + i;
-
-    if (grid[y][x] !== '' && grid[y][x] !== word[i]) {
-      return false;
+  // Check for conflicts and ensure proper spacing
+  for (let i = -1; i <= word.length; i++) {
+    for (let j = -1; j <= 1; j++) {
+      const x = pos.horizontal ? pos.x + i : pos.x + j;
+      const y = pos.horizontal ? pos.y + j : pos.y + i;
+      
+      if (x >= 0 && x < grid[0].length && y >= 0 && y < grid.length) {
+        const isWordPosition = i >= 0 && i < word.length && j === 0;
+        const currentCell = grid[y][x];
+        
+        if (isWordPosition) {
+          if (currentCell !== '' && currentCell !== word[i]) {
+            return false;
+          }
+        } else {
+          // Ensure words don't touch except at intersections
+          if (currentCell !== '') {
+            return false;
+          }
+        }
+      }
     }
   }
 
@@ -134,4 +164,26 @@ function placeWord(grid: string[][], word: string, pos: Position) {
     const y = pos.horizontal ? pos.y : pos.y + i;
     grid[y][x] = word[i];
   }
+}
+
+function countIntersections(grid: string[][], word: string, pos: Position): number {
+  let count = 0;
+  for (let i = 0; i < word.length; i++) {
+    const x = pos.horizontal ? pos.x + i : pos.x;
+    const y = pos.horizontal ? pos.y : pos.y + i;
+    
+    // Check perpendicular cells
+    const checkX = pos.horizontal ? x : x + 1;
+    const checkY = pos.horizontal ? y + 1 : y;
+    if (checkY < grid.length && checkX < grid[0].length && grid[checkY][checkX] !== '') {
+      count++;
+    }
+    
+    const checkX2 = pos.horizontal ? x : x - 1;
+    const checkY2 = pos.horizontal ? y - 1 : y;
+    if (checkY2 >= 0 && checkX2 >= 0 && grid[checkY2][checkX2] !== '') {
+      count++;
+    }
+  }
+  return count;
 }
