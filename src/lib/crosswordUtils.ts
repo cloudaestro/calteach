@@ -19,16 +19,13 @@ export const calculatePosition = (
   newLength: number,
   horizontal: boolean
 ): Position | null => {
-  let x = existingPos.x;
-  let y = existingPos.y;
-
-  if (existingPos.horizontal) {
-    x += existingIndex;
-    y -= newIndex;
-  } else {
-    x -= newIndex;
-    y += existingIndex;
-  }
+  const x = horizontal 
+    ? existingPos.x + (existingPos.horizontal ? existingIndex : 0) - newIndex
+    : existingPos.x + (existingPos.horizontal ? existingIndex : 0);
+    
+  const y = horizontal
+    ? existingPos.y + (!existingPos.horizontal ? existingIndex : 0)
+    : existingPos.y + (!existingPos.horizontal ? existingIndex : 0) - newIndex;
 
   return { x, y, horizontal };
 };
@@ -40,25 +37,25 @@ export const canPlaceWord = (grid: string[][], word: string, pos: Position): boo
     return false;
   }
 
-  for (let i = -1; i <= word.length; i++) {
-    for (let j = -1; j <= 1; j++) {
-      const x = pos.horizontal ? pos.x + i : pos.x + j;
-      const y = pos.horizontal ? pos.y + j : pos.y + i;
-      
-      if (x >= 0 && x < grid[0].length && y >= 0 && y < grid.length) {
-        const isWordPosition = i >= 0 && i < word.length && j === 0;
-        const currentCell = grid[y][x];
-        
-        if (isWordPosition) {
-          if (currentCell !== '' && currentCell.toLowerCase() !== word[i].toLowerCase()) {
-            return false;
-          }
-        } else if (currentCell !== '') {
-          return false;
-        }
-      }
+  for (let i = 0; i < word.length; i++) {
+    const x = pos.horizontal ? pos.x + i : pos.x;
+    const y = pos.horizontal ? pos.y : pos.y + i;
+    
+    // Check if current position conflicts with existing letters
+    if (grid[y][x] !== '' && grid[y][x].toLowerCase() !== word[i].toLowerCase()) {
+      return false;
+    }
+    
+    // Check adjacent cells (no words should touch except at intersections)
+    if (pos.horizontal) {
+      if (y > 0 && grid[y-1][x] !== '' && i !== newIndex) return false;
+      if (y < grid.length - 1 && grid[y+1][x] !== '' && i !== newIndex) return false;
+    } else {
+      if (x > 0 && grid[y][x-1] !== '' && i !== newIndex) return false;
+      if (x < grid[0].length - 1 && grid[y][x+1] !== '' && i !== newIndex) return false;
     }
   }
+  
   return true;
 };
 
@@ -89,36 +86,27 @@ export const findAdjacentPositions = (
   newWordLength: number
 ): Position[] => {
   const positions: Position[] = [];
-  const { x, y, horizontal } = placedWord.position;
+  const { word, position: { x, y, horizontal } } = placedWord;
   
-  // Try positions perpendicular to the placed word
-  if (horizontal) {
-    // Try vertical positions at each letter of the horizontal word
-    for (let i = 0; i < placedWord.word.length; i++) {
-      if (y > 0) positions.push({ x: x + i, y: y - 1, horizontal: false });
-      if (y < grid.length - newWordLength) positions.push({ x: x + i, y: y + 1, horizontal: false });
-    }
-  } else {
-    // Try horizontal positions at each letter of the vertical word
-    for (let i = 0; i < placedWord.word.length; i++) {
-      if (x > 0) positions.push({ x: x - 1, y: y + i, horizontal: true });
-      if (x < grid[0].length - newWordLength) positions.push({ x: x + 1, y: y + i, horizontal: true });
+  for (let i = 0; i < word.length; i++) {
+    if (horizontal) {
+      // Try vertical positions at each letter
+      if (y > newWordLength) {
+        positions.push({ x: x + i, y: y - 1, horizontal: false });
+      }
+      if (y < grid.length - newWordLength) {
+        positions.push({ x: x + i, y: y + 1, horizontal: false });
+      }
+    } else {
+      // Try horizontal positions at each letter
+      if (x > newWordLength) {
+        positions.push({ x: x - 1, y: y + i, horizontal: true });
+      }
+      if (x < grid[0].length - newWordLength) {
+        positions.push({ x: x + 1, y: y + i, horizontal: true });
+      }
     }
   }
   
   return positions;
-};
-
-export const getWordCells = (word: string, position: Position): { x: number; y: number }[] => {
-  const cells = [];
-  for (let i = 0; i < word.length; i++) {
-    const x = position.horizontal ? position.x + i : position.x;
-    const y = position.horizontal ? position.y : position.y + i;
-    cells.push({ x, y });
-  }
-  return cells;
-};
-
-export const getCellsForWord = (placedWord: { word: string; position: Position }) => {
-  return getWordCells(placedWord.word, placedWord.position);
 };

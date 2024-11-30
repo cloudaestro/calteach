@@ -16,7 +16,7 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
   const placedWords: PlacedWord[] = [];
   let clueNumber = 1;
 
-  // Place first word horizontally in the middle
+  // Place first word in the middle horizontally
   if (sortedWords.length > 0) {
     const firstWord = sortedWords[0];
     const startX = Math.floor((gridSize - firstWord.length) / 2);
@@ -30,18 +30,17 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
     });
   }
 
-  // Enhanced word placement with forced alternating orientations
+  // Try to place remaining words with alternating orientations
   let forceHorizontal = false;
-  
   for (let i = 1; i < sortedWords.length; i++) {
     const word = sortedWords[i];
     let bestPlacement: { pos: Position; intersections: number } | null = null;
     
-    // Try each placed word as an anchor point
+    // First try to find intersections with existing words
     for (const placedWord of placedWords) {
       const intersections = findIntersections(word, placedWord.word);
       
-      // Try only the opposite orientation of the previous word
+      // Try placing in opposite orientation of the previous word
       const horizontal = !placedWord.position.horizontal;
       
       for (const [newWordIndex, placedWordIndex] of intersections) {
@@ -61,24 +60,10 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
         }
       }
     }
-    
-    // If no placement found with intersections, try adjacent positions
+
+    // If no intersections found, try adjacent positions
     if (!bestPlacement) {
-      for (const placedWord of placedWords) {
-        const adjacentPositions = findAdjacentPositions(grid, placedWord, word.length);
-        for (const pos of adjacentPositions.filter(p => p.horizontal !== placedWord.position.horizontal)) {
-          if (canPlaceWord(grid, word, pos)) {
-            bestPlacement = { pos, intersections: 0 };
-            break;
-          }
-        }
-        if (bestPlacement) break;
-      }
-    }
-    
-    // If still no placement, try the opposite orientation
-    if (!bestPlacement) {
-      forceHorizontal = !forceHorizontal;
+      forceHorizontal = !forceHorizontal; // Alternate orientation
       for (const placedWord of placedWords) {
         const adjacentPositions = findAdjacentPositions(grid, placedWord, word.length);
         for (const pos of adjacentPositions.filter(p => p.horizontal === forceHorizontal)) {
@@ -90,7 +75,30 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
         if (bestPlacement) break;
       }
     }
-    
+
+    // If still no placement found, try any valid position
+    if (!bestPlacement) {
+      const centerX = Math.floor(gridSize / 2);
+      const centerY = Math.floor(gridSize / 2);
+      
+      // Try positions radiating out from center
+      for (let offset = 1; offset < gridSize / 2 && !bestPlacement; offset++) {
+        const positions = [
+          { x: centerX + offset, y: centerY, horizontal: !forceHorizontal },
+          { x: centerX - offset, y: centerY, horizontal: !forceHorizontal },
+          { x: centerX, y: centerY + offset, horizontal: forceHorizontal },
+          { x: centerX, y: centerY - offset, horizontal: forceHorizontal }
+        ];
+
+        for (const pos of positions) {
+          if (canPlaceWord(grid, word, pos)) {
+            bestPlacement = { pos, intersections: 0 };
+            break;
+          }
+        }
+      }
+    }
+
     // Place the word if a valid position was found
     if (bestPlacement) {
       placeWord(grid, word, bestPlacement.pos);
