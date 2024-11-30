@@ -41,11 +41,13 @@ const CrosswordGenerator = () => {
       
       if (mode === "ai") {
         const difficultyDesc = getDifficultyPrompt(difficulty);
-        const wordsPrompt = `Generate ${wordCount} ${difficultyDesc} English words related to the topic: ${topic}. Return only the words separated by commas, no explanations.`;
+        // Modified prompt to get more specific words
+        const wordsPrompt = `Generate ${wordCount} ${difficultyDesc} ${topic}. Return only the specific names separated by commas, no explanations or descriptions. For example, if the topic is "Animals", return "lion, tiger, elephant" etc.`;
         const wordsResponse = await generateWorksheet(wordsPrompt);
         words = wordsResponse.split(",").map(word => word.trim()).slice(0, wordCount);
         
-        const descriptionsPrompt = `Generate short, one-line descriptions for these words related to ${topic}: ${words.join(", ")}. Return only the descriptions separated by semicolons, in the same order as the words.`;
+        // Modified prompt to get more direct descriptions
+        const descriptionsPrompt = `For each of these ${topic}: ${words.join(", ")}, generate a simple, direct description that clearly identifies what it is. Each description should start with "A/An" and be factual. For example: "A large African cat with a mane" for lion. Return only the descriptions separated by semicolons, in the same order as the words.`;
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
