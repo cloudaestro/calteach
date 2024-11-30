@@ -30,8 +30,8 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
     });
   }
 
-  // Enhanced word placement with alternating orientations
-  let preferHorizontal = false; // Toggle between horizontal and vertical placements
+  // Enhanced word placement with forced alternating orientations
+  let forceHorizontal = false;
   
   for (let i = 1; i < sortedWords.length; i++) {
     const word = sortedWords[i];
@@ -41,25 +41,22 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
     for (const placedWord of placedWords) {
       const intersections = findIntersections(word, placedWord.word);
       
-      // Try both orientations with preference
-      const orientations = [!placedWord.position.horizontal, placedWord.position.horizontal];
-      if (preferHorizontal) orientations.reverse();
+      // Try only the opposite orientation of the previous word
+      const horizontal = !placedWord.position.horizontal;
       
-      for (const horizontal of orientations) {
-        for (const [newWordIndex, placedWordIndex] of intersections) {
-          const pos = calculatePosition(
-            placedWord.position,
-            placedWordIndex,
-            newWordIndex,
-            word.length,
-            horizontal
-          );
+      for (const [newWordIndex, placedWordIndex] of intersections) {
+        const pos = calculatePosition(
+          placedWord.position,
+          placedWordIndex,
+          newWordIndex,
+          word.length,
+          horizontal
+        );
 
-          if (pos && canPlaceWord(grid, word, pos)) {
-            const intersectionCount = countIntersections(grid, word, pos);
-            if (!bestPlacement || intersectionCount > bestPlacement.intersections) {
-              bestPlacement = { pos, intersections: intersectionCount };
-            }
+        if (pos && canPlaceWord(grid, word, pos)) {
+          const intersectionCount = countIntersections(grid, word, pos);
+          if (!bestPlacement || intersectionCount > bestPlacement.intersections) {
+            bestPlacement = { pos, intersections: intersectionCount };
           }
         }
       }
@@ -69,7 +66,22 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
     if (!bestPlacement) {
       for (const placedWord of placedWords) {
         const adjacentPositions = findAdjacentPositions(grid, placedWord, word.length);
-        for (const pos of adjacentPositions) {
+        for (const pos of adjacentPositions.filter(p => p.horizontal !== placedWord.position.horizontal)) {
+          if (canPlaceWord(grid, word, pos)) {
+            bestPlacement = { pos, intersections: 0 };
+            break;
+          }
+        }
+        if (bestPlacement) break;
+      }
+    }
+    
+    // If still no placement, try the opposite orientation
+    if (!bestPlacement) {
+      forceHorizontal = !forceHorizontal;
+      for (const placedWord of placedWords) {
+        const adjacentPositions = findAdjacentPositions(grid, placedWord, word.length);
+        for (const pos of adjacentPositions.filter(p => p.horizontal === forceHorizontal)) {
           if (canPlaceWord(grid, word, pos)) {
             bestPlacement = { pos, intersections: 0 };
             break;
@@ -87,14 +99,13 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
         position: bestPlacement.pos,
         number: clueNumber++
       });
-      preferHorizontal = !preferHorizontal; // Toggle preference for next word
     }
   }
 
-  // Generate detailed descriptions for the placed words
+  // Generate descriptions for placed words
   const wordsWithDescriptions = await Promise.all(
     placedWords.map(async (placedWord) => {
-      const descriptionPrompt = `Generate a detailed, specific clue for the word "${placedWord.word}" that would be suitable for a crossword puzzle. The clue should be challenging but fair, and should focus on the word's primary meaning or most common usage.`;
+      const descriptionPrompt = `Generate a detailed, specific clue for the word "${placedWord.word}" that would be suitable for a crossword puzzle. The clue should be challenging but fair.`;
       try {
         const description = await generateWorksheet(descriptionPrompt);
         return {

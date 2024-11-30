@@ -30,8 +30,6 @@ export const calculatePosition = (
     y += existingIndex;
   }
 
-  if (x < 0 || y < 0) return null;
-
   return { x, y, horizontal };
 };
 
@@ -93,21 +91,18 @@ export const findAdjacentPositions = (
   const positions: Position[] = [];
   const { x, y, horizontal } = placedWord.position;
   
+  // Try positions perpendicular to the placed word
   if (horizontal) {
-    // Try placing vertically at start and end
-    if (y > newWordLength - 1) positions.push({ x, y: y - newWordLength + 1, horizontal: false });
-    if (y < grid.length - 1) positions.push({ x, y: y + 1, horizontal: false });
-    // Try placing vertically at each intersection point
+    // Try vertical positions at each letter of the horizontal word
     for (let i = 0; i < placedWord.word.length; i++) {
-      positions.push({ x: x + i, y: y - newWordLength + 1, horizontal: false });
+      if (y > 0) positions.push({ x: x + i, y: y - 1, horizontal: false });
+      if (y < grid.length - newWordLength) positions.push({ x: x + i, y: y + 1, horizontal: false });
     }
   } else {
-    // Try placing horizontally at start and end
-    if (x > newWordLength - 1) positions.push({ x: x - newWordLength + 1, y, horizontal: true });
-    if (x < grid[0].length - 1) positions.push({ x: x + 1, y, horizontal: true });
-    // Try placing horizontally at each intersection point
+    // Try horizontal positions at each letter of the vertical word
     for (let i = 0; i < placedWord.word.length; i++) {
-      positions.push({ x: x - newWordLength + 1, y: y + i, horizontal: true });
+      if (x > 0) positions.push({ x: x - 1, y: y + i, horizontal: true });
+      if (x < grid[0].length - newWordLength) positions.push({ x: x + 1, y: y + i, horizontal: true });
     }
   }
   
