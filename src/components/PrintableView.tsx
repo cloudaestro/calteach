@@ -13,18 +13,10 @@ interface PrintableViewProps {
 
 export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
   return (
-    <div className="printable-content hidden">
+    <div className="print:block hidden">
       <div className="p-8 bg-white relative">
         {/* Watermark */}
-        <div 
-          className="absolute inset-0 flex items-center justify-center opacity-20 select-none"
-          style={{
-            transform: 'rotate(-45deg)',
-            fontSize: '2rem',
-            color: '#666',
-            zIndex: 10
-          }}
-        >
+        <div className="watermark absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 rotate-[-45deg] text-4xl text-gray-400 font-bold select-none">
           <div className="whitespace-nowrap text-center">
             CROSSWORD PUZZLE
             <br />
@@ -32,48 +24,36 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="relative z-20">
-          <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
 
-          {/* Grid */}
-          <div className="grid gap-px bg-neutral-200 w-fit mx-auto mb-8">
-            {grid.map((row, y) => (
-              <div key={y} className="flex">
-                {row.map((cell, x) => {
-                  const number = placedWords.find(
-                    word => word.position.x === x && word.position.y === y
-                  )?.number;
+        <div className="grid gap-px bg-neutral-200 w-fit mx-auto mb-8">
+          {grid.map((row, y) => (
+            <div key={y} className="flex">
+              {row.map((cell, x) => {
+                const number = placedWords.find(
+                  word => word.position.x === x && word.position.y === y
+                )?.number;
 
-                  return cell ? (
-                    <div 
-                      key={`${x}-${y}`} 
-                      className="w-8 h-8 relative bg-white border border-neutral-300"
-                    >
-                      {number && (
-                        <span className="absolute top-0 left-0 text-[8px] p-[2px]">
-                          {number}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <div 
-                      key={`${x}-${y}`} 
-                      className="w-8 h-8 bg-neutral-800" 
-                    />
-                  );
-                })}
-              </div>
-            ))}
-          </div>
+                return cell ? (
+                  <div key={`${x}-${y}`} className="w-8 h-8 relative bg-white border border-neutral-300">
+                    {number && (
+                      <span className="absolute top-0 left-0 text-[8px] p-[2px]">
+                        {number}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div key={`${x}-${y}`} className="w-8 h-8 bg-neutral-800" />
+                );
+              })}
+            </div>
+          ))}
+        </div>
 
-          {/* Clues */}
-          <CrosswordClues placedWords={placedWords} />
+        <CrosswordClues placedWords={placedWords} />
 
-          {/* Footer */}
-          <div className="text-center text-sm text-gray-500 mt-8">
-            © {new Date().getFullYear()} Crossword Puzzle Generator
-          </div>
+        <div className="text-center text-sm text-gray-500 mt-8">
+          © {new Date().getFullYear()} Crossword Puzzle Generator
         </div>
       </div>
     </div>

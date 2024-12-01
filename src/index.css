@@ -36,38 +36,36 @@
   }
 }
 
-/* Print styles */
 @media print {
-  /* Hide everything by default */
+  @page {
+    size: A4 portrait;
+    margin: 20mm;
+  }
+  
+  /* Hide everything except printable content */
   body * {
+    visibility: hidden !important;
     display: none !important;
   }
-
-  /* Only show printable content */
-  .printable-content,
-  .printable-content * {
-    display: block !important;
+  
+  .print\:block,
+  .print\:block * {
     visibility: visible !important;
+    display: block !important;
   }
-
-  /* Page setup */
-  @page {
-    size: A4;
-    margin: 2cm;
-  }
-
-  /* Ensure single page */
-  .printable-content {
+  
+  /* Force background and colors for printing */
+  .print\:block {
     position: fixed !important;
-    top: 0 !important;
     left: 0 !important;
+    top: 0 !important;
     width: 100% !important;
     height: 100% !important;
     page-break-after: avoid !important;
   }
 
-  /* Force background colors and images */
-  * {
+  /* Ensure watermark prints */
+  .print\:block .watermark {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
