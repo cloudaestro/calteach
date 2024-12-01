@@ -14,8 +14,7 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
   const gridSize = Math.max(20, Math.ceil(Math.sqrt(words.join('').length * 2)));
   const grid: string[][] = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
   const placedWords: PlacedWord[] = [];
-  let clueNumber = 1;
-
+  
   // Place first word in the middle horizontally
   if (sortedWords.length > 0) {
     const firstWord = sortedWords[0];
@@ -26,7 +25,7 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
     placedWords.push({
       word: firstWord,
       position: { x: startX, y: startY, horizontal: true },
-      number: clueNumber++
+      number: 1
     });
   }
 
@@ -105,10 +104,44 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
       placedWords.push({
         word,
         position: bestPlacement.pos,
-        number: clueNumber++
+        number: 0  // Temporary number, will be reassigned
       });
     }
   }
+
+  // Reassign numbers based on position in grid (top to bottom, left to right)
+  const numberedPositions = new Set<string>();
+  let currentNumber = 1;
+
+  // First pass: collect all positions that need numbers
+  const positionsNeedingNumbers: Array<{ x: number; y: number }> = [];
+  placedWords.forEach(word => {
+    const key = `${word.position.x},${word.position.y}`;
+    if (!numberedPositions.has(key)) {
+      positionsNeedingNumbers.push({ x: word.position.x, y: word.position.y });
+      numberedPositions.add(key);
+    }
+  });
+
+  // Sort positions by y first (top to bottom), then x (left to right)
+  positionsNeedingNumbers.sort((a, b) => {
+    if (a.y === b.y) {
+      return a.x - b.x;
+    }
+    return a.y - b.y;
+  });
+
+  // Create a mapping of positions to numbers
+  const positionToNumber = new Map<string, number>();
+  positionsNeedingNumbers.forEach(pos => {
+    positionToNumber.set(`${pos.x},${pos.y}`, currentNumber++);
+  });
+
+  // Update word numbers based on their starting position
+  placedWords.forEach(word => {
+    const key = `${word.position.x},${word.position.y}`;
+    word.number = positionToNumber.get(key) || word.number;
+  });
 
   // Generate descriptions for placed words
   const wordsWithDescriptions = await Promise.all(
