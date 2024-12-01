@@ -1,4 +1,5 @@
 import React from 'react';
+import { CrosswordCell } from '../CrosswordCell';
 
 interface CrosswordGridProps {
   grid: string[][];
@@ -32,11 +33,7 @@ export const CrosswordGrid = ({
                 (!word.position.horizontal && word.position.x === x && y >= word.position.y && y < word.position.y + word.word.length)
             );
 
-            const number = placedWords.find(
-              word => word.position.x === x && word.position.y === y
-            )?.number;
-
-            if (cell === '') {
+            if (!cell) {
               return (
                 <div
                   key={`${x}-${y}`}
@@ -45,42 +42,46 @@ export const CrosswordGrid = ({
               );
             }
 
-            const inputKey = `${placedWord?.number}-${
-              placedWord?.position.horizontal
-                ? x - placedWord.position.x
-                : y - placedWord.position.y
-            }`;
+            const number = placedWords.find(
+              word => word.position.x === x && word.position.y === y
+            )?.number;
+
+            if (!placedWord) {
+              return (
+                <div
+                  key={`${x}-${y}`}
+                  className="w-8 h-8 bg-white border border-neutral-300"
+                />
+              );
+            }
+
+            const index = placedWord.position.horizontal
+              ? x - placedWord.position.x
+              : y - placedWord.position.y;
+
+            const inputKey = `${placedWord.number}-${index}`;
+            const isWordChecked = checkedWords[placedWord.number];
+
+            // Calculate if the entire word is correct
+            const isWordCorrect = isWordChecked && placedWord.word.split('').every((letter, idx) => {
+              const input = userInputs[`${placedWord.number}-${idx}`] || '';
+              return input.toLowerCase() === letter.toLowerCase();
+            });
 
             return (
-              <div
+              <CrosswordCell
                 key={`${x}-${y}`}
-                className="w-8 h-8 relative bg-white border border-neutral-300"
-              >
-                {number && (
-                  <span className="absolute top-0 left-0 text-[8px] p-[2px]">
-                    {number}
-                  </span>
-                )}
-                <input
-                  type="text"
-                  maxLength={1}
-                  className="w-full h-full text-center uppercase bg-transparent focus:outline-none"
-                  value={userInputs[inputKey] || ''}
-                  onChange={(e) => {
-                    if (placedWord) {
-                      const index = placedWord.position.horizontal
-                        ? x - placedWord.position.x
-                        : y - placedWord.position.y;
-                      onInputChange(placedWord.number, index, e.target.value);
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (placedWord) {
-                      onKeyDown(placedWord.number, placedWord.word)(e);
-                    }
-                  }}
-                />
-              </div>
+                x={x}
+                y={y}
+                number={number}
+                value={userInputs[inputKey] || ''}
+                correctValue={cell}
+                isWordChecked={isWordChecked}
+                showSolution={false}
+                isWordCorrect={isWordCorrect}
+                onChange={(value) => onInputChange(placedWord.number, index, value)}
+                onKeyDown={onKeyDown(placedWord.number, placedWord.word)}
+              />
             );
           })}
         </div>
