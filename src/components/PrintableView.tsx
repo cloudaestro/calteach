@@ -22,7 +22,8 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
 
         <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
 
-        <div className="grid gap-px bg-neutral-200 w-fit mx-auto mb-8">
+        {/* Updated grid styling for perfect alignment */}
+        <div className="grid gap-0 w-fit mx-auto mb-8 border border-neutral-300">
           {grid.map((row, y) => (
             <div key={y} className="flex">
               {row.map((cell, x) => {
@@ -31,15 +32,21 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
                 )?.number;
 
                 return cell ? (
-                  <div key={`${x}-${y}`} className="w-10 h-10 relative bg-white border border-neutral-300">
+                  <div 
+                    key={`${x}-${y}`} 
+                    className="w-10 h-10 relative bg-white border-r border-b border-neutral-300 last:border-r-0"
+                  >
                     {number && (
-                      <span className="absolute top-0 left-0 text-[10px] p-[2px]">
+                      <span className="absolute top-0.5 left-0.5 text-[10px] leading-none">
                         {number}
                       </span>
                     )}
                   </div>
                 ) : (
-                  <div key={`${x}-${y}`} className="w-10 h-10 bg-neutral-800" />
+                  <div 
+                    key={`${x}-${y}`} 
+                    className="w-10 h-10 bg-neutral-800 border-r border-b border-neutral-300 last:border-r-0" 
+                  />
                 );
               })}
             </div>
