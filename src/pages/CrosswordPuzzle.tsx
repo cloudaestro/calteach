@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CrosswordGrid } from "@/components/crossword/CrosswordGrid";
 import { CrosswordClues } from "@/components/CrosswordClues";
 import { useToast } from "@/hooks/use-toast";
-import { Printer } from "lucide-react";
+import { Printer, ArrowLeft } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -56,6 +56,15 @@ const CrosswordPuzzle = () => {
   return (
     <div className="min-h-screen bg-neutral-50 p-4">
       <div className="max-w-4xl mx-auto">
+        <Button 
+          variant="ghost" 
+          className="mb-4" 
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+
         <div className="space-y-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Crossword Puzzle</h2>

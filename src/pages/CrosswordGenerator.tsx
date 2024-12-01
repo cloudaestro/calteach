@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { generateWorksheet } from "@/lib/gemini";
 import { generateCrossword } from "@/lib/crosswordGenerator";
+import { ArrowLeft } from "lucide-react";
 
 type WordGenerationMode = "ai" | "custom";
 type DifficultyLevel = "easy" | "medium" | "hard";
@@ -79,6 +80,15 @@ const CrosswordGenerator = () => {
   return (
     <div className="min-h-screen bg-neutral-50 p-4">
       <div className="max-w-4xl mx-auto">
+        <Button 
+          variant="ghost" 
+          className="mb-4" 
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+        
         <Card>
           <CardHeader>
             <CardTitle>Create Crossword Worksheet</CardTitle>

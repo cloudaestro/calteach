@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { CrosswordGrid } from "@/components/crossword/CrosswordGrid";
 import { CrosswordClues } from "@/components/CrosswordClues";
 import { AnswerSheet } from "@/components/AnswerSheet";
+import { ArrowLeft } from "lucide-react";
 
 const CrosswordPrint = () => {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [crosswordData, setCrosswordData] = useState(null);
   const showAnswers = location.pathname.includes('print-answer');
 
@@ -30,6 +33,16 @@ const CrosswordPrint = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <div className="p-4 print:hidden">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+      </div>
+
       {/* First Page - Worksheet */}
       <div className="p-8 print:p-0">
         <div className="max-w-4xl mx-auto print:max-w-none">

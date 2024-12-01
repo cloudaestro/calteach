@@ -1,15 +1,19 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { generateWorksheet } from "@/lib/gemini";
 import { generateCrossword } from "@/lib/crosswordGenerator";
 import { GenerationForm } from "@/components/crossword/GenerationForm";
 import { CrosswordGrid } from "@/components/crossword/CrosswordGrid";
 import { CrosswordClues } from "@/components/CrosswordClues";
 import { PrintableView } from "@/components/PrintableView";
+import { ArrowLeft } from "lucide-react";
 
 type WordGenerationMode = "ai" | "custom";
 
 const CrosswordWorksheet = () => {
+  const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
   const [crosswordData, setCrosswordData] = useState<{
     grid: string[][];
@@ -41,13 +45,13 @@ const CrosswordWorksheet = () => {
         words = customWords.split(",").map(word => word.trim());
         descriptions = words.map(word => `Enter the word that means: ${word}`);
       }
-      
+
       const crosswordResult = await generateCrossword(words);
       const enhancedPlacedWords = crosswordResult.placedWords.map((word, index) => ({
         ...word,
         description: descriptions[words.indexOf(word.word)] || `Enter: ${word.word}`
       }));
-      
+
       setCrosswordData({
         grid: crosswordResult.grid,
         placedWords: enhancedPlacedWords,
@@ -73,6 +77,15 @@ const CrosswordWorksheet = () => {
   return (
     <div className="min-h-screen bg-neutral-50 p-4">
       <div className="max-w-4xl mx-auto">
+        <Button 
+          variant="ghost" 
+          className="mb-4" 
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+
         <Card>
           <CardHeader>
             <CardTitle>Create Crossword Worksheet</CardTitle>
