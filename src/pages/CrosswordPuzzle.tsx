@@ -46,8 +46,7 @@ const CrosswordPuzzle = () => {
     // Get all letters for this word from user inputs
     const userWord = Array.from(word).map((_, index) => {
       const inputKey = `${wordNumber}-${index}`;
-      const userInput = (userInputs[inputKey] || '').trim().toLowerCase();
-      return userInput;
+      return (userInputs[inputKey] || '').trim().toLowerCase();
     }).join('');
 
     // Compare ignoring case and whitespace
@@ -57,7 +56,8 @@ const CrosswordPuzzle = () => {
       userWord,
       correctWord,
       isCorrect: userWord === correctWord,
-      wordNumber
+      wordNumber,
+      inputs: userInputs
     });
 
     return userWord === correctWord;
