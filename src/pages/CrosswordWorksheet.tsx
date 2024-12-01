@@ -42,8 +42,15 @@ const CrosswordWorksheet = () => {
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
-        words = customWords.split(",").map(word => word.trim());
-        descriptions = words.map(word => `Enter the word that means: ${word}`);
+        // Parse custom words and descriptions
+        const lines = customWords.split("\n").filter(line => line.trim());
+        lines.forEach(line => {
+          const [word, description] = line.split(":").map(part => part.trim());
+          if (word && description) {
+            words.push(word);
+            descriptions.push(description);
+          }
+        });
       }
 
       const crosswordResult = await generateCrossword(words);
@@ -79,7 +86,7 @@ const CrosswordWorksheet = () => {
       <div className="max-w-4xl mx-auto">
         <Button 
           variant="ghost" 
-          className="mb-4" 
+          className="mb-4 print:hidden" 
           onClick={() => navigate(-1)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -112,7 +119,6 @@ const CrosswordWorksheet = () => {
           </CardContent>
         </Card>
 
-        {/* Hidden printable view that's always ready */}
         {crosswordData && (
           <PrintableView
             grid={crosswordData.grid}

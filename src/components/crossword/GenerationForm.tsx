@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type WordGenerationMode = "ai" | "custom";
@@ -19,6 +20,11 @@ export const GenerationForm = ({ onGenerate, isGenerating }: GenerationFormProps
     e.preventDefault();
     await onGenerate(mode, topic, customWords);
   };
+
+  const customWordsPlaceholder = 
+`word1:description1
+word2:description2
+word3:description3`;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -46,14 +52,15 @@ export const GenerationForm = ({ onGenerate, isGenerating }: GenerationFormProps
         </div>
       ) : (
         <div className="space-y-2">
-          <label className="text-sm font-medium">Custom Words</label>
-          <Input
-            placeholder="Enter words separated by commas"
+          <label className="text-sm font-medium">Custom Words and Descriptions</label>
+          <Textarea
+            placeholder={customWordsPlaceholder}
             value={customWords}
             onChange={(e) => setCustomWords(e.target.value)}
+            className="min-h-[200px]"
           />
           <p className="text-sm text-neutral-500">
-            Enter words separated by commas (e.g., cat, dog, bird)
+            Enter each word and its description on a new line, separated by a colon (:)
           </p>
         </div>
       )}
