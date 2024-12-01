@@ -30,12 +30,12 @@ export const CrosswordCell = ({
   
   return (
     <div className={cn(
-      "w-8 h-8 relative bg-white border border-neutral-300",
+      "w-10 h-10 relative bg-white border border-neutral-300 print:w-10 print:h-10",
       isPartOfCurrentWord && "bg-blue-50",
       isWordChecked && (isCorrect ? "bg-green-100" : "bg-red-100")
     )}>
       {number && (
-        <span className="absolute top-0 left-0 text-[8px] p-[2px]">
+        <span className="absolute top-0 left-0 text-[10px] p-[2px]">
           {number}
         </span>
       )}
