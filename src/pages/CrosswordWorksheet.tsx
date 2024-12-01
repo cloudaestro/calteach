@@ -1,15 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { generateWorksheet } from "@/lib/gemini";
 import { generateCrossword } from "@/lib/crosswordGenerator";
 import { GenerationForm } from "@/components/crossword/GenerationForm";
 import { CrosswordGrid } from "@/components/crossword/CrosswordGrid";
 import { CrosswordClues } from "@/components/CrosswordClues";
-import { PrintableView } from "@/components/PrintableView";
+import { Button } from "@/components/ui/button";
 
 type WordGenerationMode = "ai" | "custom";
 
 const CrosswordWorksheet = () => {
+  const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
   const [crosswordData, setCrosswordData] = useState<{
     grid: string[][];
@@ -70,6 +72,12 @@ const CrosswordWorksheet = () => {
     }));
   };
 
+  const handlePrint = () => {
+    if (crosswordData) {
+      navigate('/print', { state: crosswordData });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 p-4">
       <div className="max-w-4xl mx-auto">
@@ -85,7 +93,12 @@ const CrosswordWorksheet = () => {
 
             {crosswordData && (
               <div className="mt-8">
-                <h3 className="font-medium mb-4">Fill in the Crossword:</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-medium">Fill in the Crossword:</h3>
+                  <Button onClick={handlePrint}>
+                    Print Worksheet
+                  </Button>
+                </div>
                 <CrosswordGrid
                   grid={crosswordData.grid}
                   placedWords={crosswordData.placedWords}
@@ -98,14 +111,6 @@ const CrosswordWorksheet = () => {
             )}
           </CardContent>
         </Card>
-
-        {/* Hidden printable view that's always ready */}
-        {crosswordData && (
-          <PrintableView
-            grid={crosswordData.grid}
-            placedWords={crosswordData.placedWords}
-          />
-        )}
       </div>
     </div>
   );
