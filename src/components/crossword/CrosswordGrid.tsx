@@ -72,7 +72,7 @@ export const CrosswordGrid = ({
   };
 
   return (
-    <div className="grid gap-px bg-neutral-200 w-fit mx-auto">
+    <div className="grid gap-px bg-neutral-200 print:bg-white w-fit mx-auto">
       {grid.map((row, y) => (
         <div key={y} className="flex">
           {row.map((cell, x) => {
@@ -82,7 +82,7 @@ export const CrosswordGrid = ({
               return (
                 <div
                   key={`${x}-${y}`}
-                  className="w-8 h-8 bg-neutral-800"
+                  className="w-8 h-8 bg-neutral-800 print:bg-white print:border print:border-black"
                 />
               );
             }
@@ -95,7 +95,7 @@ export const CrosswordGrid = ({
               return (
                 <div
                   key={`${x}-${y}`}
-                  className="w-8 h-8 bg-white border border-neutral-300"
+                  className="w-8 h-8 bg-white border border-neutral-300 print:border-black print:bg-white"
                 />
               );
             }
