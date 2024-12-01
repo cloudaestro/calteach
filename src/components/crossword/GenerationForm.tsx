@@ -22,16 +22,16 @@ export const GenerationForm = ({ onGenerate, isGenerating }: GenerationFormProps
   };
 
   const customWordsPlaceholder = 
-`word1:description1
-word2:description2
-word3:description3`;
+`cat:A small furry pet that meows
+dog:A loyal companion animal that barks
+bird:A feathered creature that can fly`;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <label className="text-sm font-medium">Generation Mode</label>
         <Select value={mode} onValueChange={(value: WordGenerationMode) => setMode(value)}>
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select mode" />
           </SelectTrigger>
           <SelectContent>
@@ -53,15 +53,18 @@ word3:description3`;
       ) : (
         <div className="space-y-2">
           <label className="text-sm font-medium">Custom Words and Descriptions</label>
+          <div className="bg-neutral-50 p-4 rounded-md mb-2">
+            <h4 className="text-sm font-medium mb-2">Format Instructions:</h4>
+            <p className="text-sm text-neutral-600 mb-1">1. Write one word and its description per line</p>
+            <p className="text-sm text-neutral-600 mb-1">2. Separate word and description with a colon (:)</p>
+            <p className="text-sm text-neutral-600">Example: cat:A small furry pet that meows</p>
+          </div>
           <Textarea
             placeholder={customWordsPlaceholder}
             value={customWords}
             onChange={(e) => setCustomWords(e.target.value)}
-            className="min-h-[200px]"
+            className="min-h-[200px] font-mono text-sm"
           />
-          <p className="text-sm text-neutral-500">
-            Enter each word and its description on a new line, separated by a colon (:)
-          </p>
         </div>
       )}
 
