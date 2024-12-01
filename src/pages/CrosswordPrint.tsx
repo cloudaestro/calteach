@@ -29,33 +29,37 @@ const CrosswordPrint = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white p-8 print:p-0">
-      <div className="max-w-4xl mx-auto print:max-w-none">
-        <div className="space-y-8 print:space-y-4">
-          {/* Watermark */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.15] rotate-[-35deg] text-4xl font-bold text-neutral-400">
-            TeachSheets AI
-          </div>
+    <div className="min-h-screen bg-white">
+      {/* First Page - Worksheet */}
+      <div className="p-8 print:p-0">
+        <div className="max-w-4xl mx-auto print:max-w-none">
+          <div className="space-y-8 print:space-y-4">
+            {/* Watermark */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.15] rotate-[-35deg] text-4xl font-bold text-neutral-400">
+              TeachSheets AI
+            </div>
 
-          <h1 className="text-3xl font-bold text-center print:text-2xl">
-            Crossword Puzzle
-          </h1>
+            <h1 className="text-3xl font-bold text-center print:text-2xl">
+              Crossword Puzzle
+            </h1>
 
-          <CrosswordGrid
-            grid={crosswordData.grid}
-            placedWords={crosswordData.placedWords}
-            userInputs={{}}
-            onInputChange={() => {}}
-          />
+            <CrosswordGrid
+              grid={crosswordData.grid}
+              placedWords={crosswordData.placedWords}
+              userInputs={{}}
+              onInputChange={() => {}}
+            />
 
-          <CrosswordClues placedWords={crosswordData.placedWords} />
+            <CrosswordClues placedWords={crosswordData.placedWords} />
 
-          <div className="text-center text-sm text-gray-500 print:mt-8">
-            © {new Date().getFullYear()} TeachSheets AI
+            <div className="text-center text-sm text-gray-500 print:mt-8">
+              © {new Date().getFullYear()} TeachSheets AI
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Second Page - Answer Sheet (only if showAnswers is true) */}
       {showAnswers && <AnswerSheet placedWords={crosswordData.placedWords} />}
     </div>
   );
