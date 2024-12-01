@@ -39,6 +39,36 @@ const CrosswordPuzzle = () => {
     }
   }, [id]);
 
+  const checkWord = (word: string, userWord: string) => {
+    return word.toLowerCase() === userWord.toLowerCase();
+  };
+
+  const handleKeyDown = (wordNumber: number, word: string) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      const placedWord = crosswordData.placedWords.find(w => w.number === wordNumber);
+      if (!placedWord) return;
+
+      const userWord = Array(word.length).fill('')
+        .map((_, i) => userInputs[`${wordNumber}-${i}`] || '')
+        .join('');
+
+      const isCorrect = checkWord(placedWord.word, userWord);
+      
+      setCheckedWords(prev => ({
+        ...prev,
+        [wordNumber]: true
+      }));
+
+      toast({
+        title: isCorrect ? "Correct!" : "Incorrect!",
+        description: isCorrect 
+          ? "Great job! The word is correct." 
+          : "Try again. The word is not correct.",
+        variant: isCorrect ? "default" : "destructive",
+      });
+    }
+  };
+
   const handlePrintWithAnswers = () => {
     setShowPrintDialog(false);
     navigate(`/crossword/print-answer/${id}`);
@@ -101,6 +131,7 @@ const CrosswordPuzzle = () => {
             grid={crosswordData.grid}
             placedWords={crosswordData.placedWords}
             userInputs={userInputs}
+            checkedWords={checkedWords}
             onInputChange={(number, index, value) => {
               const key = `${number}-${index}`;
               setUserInputs(prev => ({
@@ -108,6 +139,7 @@ const CrosswordPuzzle = () => {
                 [key]: value.toUpperCase()
               }));
             }}
+            onKeyDown={handleKeyDown}
           />
 
           <CrosswordClues placedWords={crosswordData.placedWords} />

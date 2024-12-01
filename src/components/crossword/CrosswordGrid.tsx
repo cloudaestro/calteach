@@ -8,10 +8,19 @@ interface CrosswordGridProps {
     number: number;
   }>;
   userInputs: { [key: string]: string };
+  checkedWords: { [key: number]: boolean };
   onInputChange: (number: number, index: number, value: string) => void;
+  onKeyDown: (wordNumber: number, word: string) => (e: React.KeyboardEvent) => void;
 }
 
-export const CrosswordGrid = ({ grid, placedWords, userInputs, onInputChange }: CrosswordGridProps) => {
+export const CrosswordGrid = ({ 
+  grid, 
+  placedWords, 
+  userInputs, 
+  checkedWords,
+  onInputChange,
+  onKeyDown 
+}: CrosswordGridProps) => {
   return (
     <div className="grid gap-px bg-neutral-200 w-fit mx-auto">
       {grid.map((row, y) => (
@@ -63,6 +72,11 @@ export const CrosswordGrid = ({ grid, placedWords, userInputs, onInputChange }: 
                         ? x - placedWord.position.x
                         : y - placedWord.position.y;
                       onInputChange(placedWord.number, index, e.target.value);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (placedWord) {
+                      onKeyDown(placedWord.number, placedWord.word)(e);
                     }
                   }}
                 />
