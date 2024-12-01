@@ -110,7 +110,9 @@ const CrosswordWorksheet = () => {
                   grid={crosswordData.grid}
                   placedWords={crosswordData.placedWords}
                   userInputs={userInputs}
+                  checkedWords={{}}
                   onInputChange={handleInputChange}
+                  onKeyDown={() => () => {}}
                 />
 
                 <CrosswordClues placedWords={crosswordData.placedWords} />

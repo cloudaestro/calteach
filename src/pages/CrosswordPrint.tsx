@@ -60,7 +60,9 @@ const CrosswordPrint = () => {
               grid={crosswordData.grid}
               placedWords={crosswordData.placedWords}
               userInputs={{}}
+              checkedWords={{}}
               onInputChange={() => {}}
+              onKeyDown={() => () => {}}
             />
 
             <CrosswordClues placedWords={crosswordData.placedWords} />
