@@ -42,7 +42,7 @@ const CrosswordWorksheet = () => {
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
-        // Parse custom words and descriptions
+        // Parse custom words and descriptions from the new format
         const lines = customWords.split("\n").filter(line => line.trim());
         lines.forEach(line => {
           const [word, description] = line.split(":").map(part => part.trim());
