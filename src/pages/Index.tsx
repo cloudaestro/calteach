@@ -4,6 +4,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 
+// Declare the adsbygoogle type on window
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
+
 const features = [
   {
     icon: FileText,
