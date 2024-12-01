@@ -62,8 +62,7 @@ export const CrosswordGrid = ({
             const inputKey = `${placedWord.number}-${index}`;
             const isWordChecked = checkedWords[placedWord.number];
 
-            // Calculate if the entire word is correct
-            const isWordCorrect = isWordChecked && placedWord.word.split('').every((letter, idx) => {
+            const isWordCorrect = isWordChecked && Array.from(placedWord.word).every((letter, idx) => {
               const input = userInputs[`${placedWord.number}-${idx}`] || '';
               return input.toLowerCase() === letter.toLowerCase();
             });

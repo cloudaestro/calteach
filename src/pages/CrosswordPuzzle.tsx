@@ -44,13 +44,13 @@ const CrosswordPuzzle = () => {
     if (!placedWord) return false;
 
     // Get all letters for this word from user inputs
-    const userWord = word.split('').map((_, index) => {
+    const userWord = Array.from(word).map((_, index) => {
       const inputKey = `${wordNumber}-${index}`;
-      return userInputs[inputKey] || '';
+      return (userInputs[inputKey] || '').toLowerCase();
     }).join('');
 
-    // Compare ignoring case and whitespace
-    return word.toLowerCase().trim() === userWord.toLowerCase().trim();
+    // Compare ignoring case
+    return word.toLowerCase() === userWord;
   };
 
   const handleKeyDown = (wordNumber: number, word: string) => (e: React.KeyboardEvent) => {
@@ -63,13 +63,21 @@ const CrosswordPuzzle = () => {
       }));
 
       toast({
-        title: isCorrect ? "Correct!" : "Incorrect!",
+        title: isCorrect ? "Correct!" : "Try Again",
         description: isCorrect 
           ? "Great job! The word is correct." 
-          : "Try again. The word is not correct.",
+          : "The word is not correct. Keep trying!",
         variant: isCorrect ? "default" : "destructive",
       });
     }
+  };
+
+  const handleInputChange = (wordNumber: number, index: number, value: string) => {
+    const key = `${wordNumber}-${index}`;
+    setUserInputs(prev => ({
+      ...prev,
+      [key]: value.toUpperCase()
+    }));
   };
 
   if (!crosswordData) {
@@ -125,13 +133,7 @@ const CrosswordPuzzle = () => {
             placedWords={crosswordData.placedWords}
             userInputs={userInputs}
             checkedWords={checkedWords}
-            onInputChange={(number, index, value) => {
-              const key = `${number}-${index}`;
-              setUserInputs(prev => ({
-                ...prev,
-                [key]: value.toUpperCase()
-              }));
-            }}
+            onInputChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />
 

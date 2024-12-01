@@ -28,6 +28,11 @@ export const CrosswordCell = ({
   onKeyDown,
   onFocus
 }: CrosswordCellProps) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value.slice(-1).toUpperCase();
+    onChange(newValue);
+  };
+
   return (
     <div className={cn(
       "w-8 h-8 relative bg-white border border-neutral-300 print:w-10 print:h-10",
@@ -48,7 +53,7 @@ export const CrosswordCell = ({
           showSolution && !value && "text-gray-500"
         )}
         value={showSolution && !value ? correctValue : value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleChange}
         onKeyDown={onKeyDown}
         onFocus={onFocus}
       />
