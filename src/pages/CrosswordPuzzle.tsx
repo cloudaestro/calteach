@@ -46,11 +46,18 @@ const CrosswordPuzzle = () => {
     // Get all letters for this word from user inputs
     const userWord = Array.from(word).map((_, index) => {
       const inputKey = `${wordNumber}-${index}`;
-      return (userInputs[inputKey] || '').toLowerCase();
+      const userInput = userInputs[inputKey] || '';
+      return userInput.toLowerCase();
     }).join('');
 
     // Compare ignoring case
-    return word.toLowerCase() === userWord;
+    const correctWord = word.toLowerCase();
+    console.log('Checking word:', {
+      userWord,
+      correctWord,
+      isCorrect: userWord === correctWord
+    });
+    return userWord === correctWord;
   };
 
   const handleKeyDown = (wordNumber: number, word: string) => (e: React.KeyboardEvent) => {
