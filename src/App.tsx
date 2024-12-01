@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CrosswordGenerator from "./pages/CrosswordGenerator";
 import CrosswordPuzzle from "./pages/CrosswordPuzzle";
+import CrosswordPrint from "./pages/CrosswordPrint";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/crossword" element={<CrosswordGenerator />} />
           <Route path="/crossword/:id" element={<CrosswordPuzzle />} />
+          <Route path="/crossword/print/:id" element={<CrosswordPrint />} />
         </Routes>
       </AuthProvider>
     </Router>

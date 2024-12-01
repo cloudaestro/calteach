@@ -93,7 +93,7 @@ const CrosswordPuzzle = () => {
   };
 
   const handlePrint = () => {
-    window.print();
+    navigate(`/crossword/print/${id}`);
   };
 
   if (!crosswordData) {
