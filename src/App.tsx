@@ -20,6 +20,7 @@ function App() {
           <Route path="/crossword" element={<CrosswordGenerator />} />
           <Route path="/crossword/:id" element={<CrosswordPuzzle />} />
           <Route path="/crossword/print/:id" element={<CrosswordPrint />} />
+          <Route path="/crossword/print-answer/:id" element={<CrosswordPrint />} />
         </Routes>
       </AuthProvider>
     </Router>

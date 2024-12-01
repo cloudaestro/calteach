@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { CrosswordCell } from "@/components/CrosswordCell";
+import { CrosswordGrid } from "@/components/crossword/CrosswordGrid";
 import { CrosswordClues } from "@/components/CrosswordClues";
-import { PrintableView } from "@/components/PrintableView";
 import { useToast } from "@/hooks/use-toast";
 import { Printer } from "lucide-react";
 import {
@@ -14,32 +12,25 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
-interface PlacedWord {
-  word: string;
-  position: {
-    x: number;
-    y: number;
-    horizontal: boolean;
-  };
-  number: number;
-  description?: string;
-}
-
-interface CrosswordData {
-  grid: string[][];
-  placedWords: PlacedWord[];
-  size: number;
-}
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CrosswordPuzzle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [crosswordData, setCrosswordData] = useState<CrosswordData | null>(null);
-  const [userInputs, setUserInputs] = useState<{ [key: string]: string }>({});
-  const [checkedWords, setCheckedWords] = useState<{ [key: number]: boolean }>({});
-  const [showSolution, setShowSolution] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [crosswordData, setCrosswordData] = useState(null);
+  const [userInputs, setUserInputs] = useState({});
+  const [checkedWords, setCheckedWords] = useState({});
 
   useEffect(() => {
     const data = localStorage.getItem(`crossword-${id}`);
@@ -48,51 +39,13 @@ const CrosswordPuzzle = () => {
     }
   }, [id]);
 
-  const handleInputChange = (number: number, index: number, value: string) => {
-    const key = `${number}-${index}`;
-    setUserInputs(prev => ({
-      ...prev,
-      [key]: value.toUpperCase()
-    }));
+  const handlePrintWithAnswers = () => {
+    setShowPrintDialog(false);
+    navigate(`/crossword/print-answer/${id}`);
   };
 
-  const checkWord = (wordNumber: number) => {
-    if (!crosswordData) return;
-    
-    const word = crosswordData.placedWords.find(w => w.number === wordNumber);
-    if (!word) return;
-
-    let isCorrect = true;
-    for (let i = 0; i < word.word.length; i++) {
-      const key = `${wordNumber}-${i}`;
-      const userInput = userInputs[key]?.toLowerCase() || '';
-      const correctLetter = word.word[i].toLowerCase();
-      
-      if (userInput !== correctLetter) {
-        isCorrect = false;
-        break;
-      }
-    }
-
-    setCheckedWords(prev => ({
-      ...prev,
-      [wordNumber]: true
-    }));
-
-    toast({
-      title: isCorrect ? "Correct!" : "Try again!",
-      description: isCorrect ? "Well done!" : "Keep trying, you can do it!",
-      variant: isCorrect ? "default" : "destructive",
-    });
-  };
-
-  const handleKeyDown = (wordNumber: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      checkWord(wordNumber);
-    }
-  };
-
-  const handlePrint = () => {
+  const handlePrintWithoutAnswers = () => {
+    setShowPrintDialog(false);
     navigate(`/crossword/print/${id}`);
   };
 
@@ -103,111 +56,73 @@ const CrosswordPuzzle = () => {
   return (
     <div className="min-h-screen bg-neutral-50 p-4">
       <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardContent className="space-y-4 p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Crossword Puzzle</h2>
-              <div className="space-x-2">
-                <Button variant="outline" onClick={() => navigate("/crossword")}>
-                  Create New Puzzle
-                </Button>
-                <Button variant="outline" onClick={handlePrint}>
-                  <Printer className="w-4 h-4 mr-2" />
-                  Print
-                </Button>
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline">Show Answers</Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Answers</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-4">
-                      {crosswordData.placedWords.map((word, index) => (
-                        <div key={index} className="mb-2">
-                          <span className="font-bold">{word.number}. </span>
-                          <span>{word.word}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Crossword Puzzle</h2>
+            <div className="space-x-2">
+              <Button variant="outline" onClick={() => navigate("/crossword")}>
+                Create New Puzzle
+              </Button>
+              <Button variant="outline" onClick={() => setShowPrintDialog(true)}>
+                <Printer className="w-4 h-4 mr-2" />
+                Print
+              </Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline">Show Answers</Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Answers</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-4">
+                    {crosswordData.placedWords.map((word, index) => (
+                      <div key={index} className="mb-2">
+                        <span className="font-bold">{word.number}. </span>
+                        <span>{word.word}</span>
+                      </div>
+                    ))}
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
+          </div>
 
-            <div className="grid gap-px bg-neutral-200 w-fit mx-auto">
-              {crosswordData.grid.map((row, y) => (
-                <div key={y} className="flex">
-                  {row.map((cell, x) => {
-                    const placedWord = crosswordData.placedWords.find(
-                      word => 
-                        (word.position.horizontal && word.position.y === y && x >= word.position.x && x < word.position.x + word.word.length) ||
-                        (!word.position.horizontal && word.position.x === x && y >= word.position.y && y < word.position.y + word.word.length)
-                    );
+          <CrosswordGrid
+            grid={crosswordData.grid}
+            placedWords={crosswordData.placedWords}
+            userInputs={userInputs}
+            onInputChange={(number, index, value) => {
+              const key = `${number}-${index}`;
+              setUserInputs(prev => ({
+                ...prev,
+                [key]: value.toUpperCase()
+              }));
+            }}
+          />
 
-                    const number = crosswordData.placedWords.find(
-                      word => word.position.x === x && word.position.y === y
-                    )?.number;
-
-                    const isInputCell = cell !== '';
-
-                    if (!isInputCell) {
-                      return (
-                        <div
-                          key={`${x}-${y}`}
-                          className="w-8 h-8 bg-neutral-800"
-                        />
-                      );
-                    }
-
-                    const inputKey = `${placedWord?.number}-${
-                      placedWord?.position.horizontal
-                        ? x - placedWord.position.x
-                        : y - placedWord.position.y
-                    }`;
-
-                    const correctLetter = placedWord?.word[
-                      placedWord.position.horizontal
-                        ? x - placedWord.position.x
-                        : y - placedWord.position.y
-                    ] || '';
-
-                    return (
-                      <CrosswordCell
-                        key={`${x}-${y}`}
-                        x={x}
-                        y={y}
-                        number={number}
-                        value={userInputs[inputKey] || ''}
-                        correctValue={correctLetter}
-                        isWordChecked={placedWord ? checkedWords[placedWord.number] : false}
-                        showSolution={showSolution}
-                        onChange={(value) => {
-                          if (placedWord) {
-                            const index = placedWord.position.horizontal
-                              ? x - placedWord.position.x
-                              : y - placedWord.position.y;
-                            handleInputChange(placedWord.number, index, value);
-                          }
-                        }}
-                        onKeyDown={(e) => placedWord && handleKeyDown(placedWord.number, e)}
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <CrosswordClues placedWords={crosswordData.placedWords} />
-          </CardContent>
-        </Card>
-
-        <PrintableView
-          grid={crosswordData.grid}
-          placedWords={crosswordData.placedWords}
-        />
+          <CrosswordClues placedWords={crosswordData.placedWords} />
+        </div>
       </div>
+
+      <AlertDialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Print Options</AlertDialogTitle>
+            <AlertDialogDescription>
+              Would you like to include an answer sheet with your crossword puzzle?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handlePrintWithoutAnswers}>
+              No, just the puzzle
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handlePrintWithAnswers}>
+              Yes, include answers
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
