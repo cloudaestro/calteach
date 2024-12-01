@@ -46,17 +46,19 @@ const CrosswordPuzzle = () => {
     // Get all letters for this word from user inputs
     const userWord = Array.from(word).map((_, index) => {
       const inputKey = `${wordNumber}-${index}`;
-      return (userInputs[inputKey] || '').trim().toLowerCase();
+      const userInput = (userInputs[inputKey] || '').trim().toLowerCase();
+      return userInput;
     }).join('');
 
     // Compare ignoring case and whitespace
     const correctWord = word.toLowerCase().trim();
     
-    console.log('Checking word:', {
+    console.log('Word validation:', {
       userWord,
       correctWord,
       isCorrect: userWord === correctWord,
       wordNumber,
+      position: placedWord.position,
       inputs: userInputs
     });
 

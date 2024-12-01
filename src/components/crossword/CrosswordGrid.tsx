@@ -22,17 +22,29 @@ export const CrosswordGrid = ({
   onInputChange,
   onKeyDown 
 }: CrosswordGridProps) => {
+  // Helper function to get all words that use a specific cell
+  const getWordsAtCell = (x: number, y: number) => {
+    return placedWords.filter(word => {
+      if (word.position.horizontal) {
+        return y === word.position.y && 
+               x >= word.position.x && 
+               x < word.position.x + word.word.length;
+      } else {
+        return x === word.position.x && 
+               y >= word.position.y && 
+               y < word.position.y + word.word.length;
+      }
+    });
+  };
+
   return (
     <div className="grid gap-px bg-neutral-200 w-fit mx-auto">
       {grid.map((row, y) => (
         <div key={y} className="flex">
           {row.map((cell, x) => {
-            const placedWord = placedWords.find(
-              word =>
-                (word.position.horizontal && word.position.y === y && x >= word.position.x && x < word.position.x + word.word.length) ||
-                (!word.position.horizontal && word.position.x === x && y >= word.position.y && y < word.position.y + word.word.length)
-            );
-
+            // Get all words that use this cell
+            const wordsAtCell = getWordsAtCell(x, y);
+            
             if (!cell) {
               return (
                 <div
@@ -42,11 +54,12 @@ export const CrosswordGrid = ({
               );
             }
 
+            // Get the word number if this is the start of any word
             const number = placedWords.find(
               word => word.position.x === x && word.position.y === y
             )?.number;
 
-            if (!placedWord) {
+            if (wordsAtCell.length === 0) {
               return (
                 <div
                   key={`${x}-${y}`}
@@ -55,17 +68,35 @@ export const CrosswordGrid = ({
               );
             }
 
-            const index = placedWord.position.horizontal
-              ? x - placedWord.position.x
-              : y - placedWord.position.y;
+            // For each word at this cell, check if it's correct
+            const cellStates = wordsAtCell.map(word => {
+              const index = word.position.horizontal
+                ? x - word.position.x
+                : y - word.position.y;
 
-            const inputKey = `${placedWord.number}-${index}`;
-            const isWordChecked = checkedWords[placedWord.number];
+              const inputKey = `${word.number}-${index}`;
+              const isWordChecked = checkedWords[word.number];
 
-            const isWordCorrect = isWordChecked && Array.from(placedWord.word).every((letter, idx) => {
-              const input = (userInputs[`${placedWord.number}-${idx}`] || '').trim().toLowerCase();
-              return input === letter.toLowerCase();
-            });
+              if (!isWordChecked) return null;
+
+              const isWordCorrect = Array.from(word.word).every((letter, idx) => {
+                const input = (userInputs[`${word.number}-${idx}`] || '').trim().toLowerCase();
+                return input === letter.toLowerCase();
+              });
+
+              return { isWordChecked, isWordCorrect };
+            }).filter(Boolean);
+
+            // Determine the overall state of the cell
+            const isAnyWordChecked = cellStates.some(state => state?.isWordChecked);
+            const areAllCheckedWordsCorrect = cellStates.every(state => state?.isWordCorrect);
+
+            // Use the first word for input handling
+            const primaryWord = wordsAtCell[0];
+            const index = primaryWord.position.horizontal
+              ? x - primaryWord.position.x
+              : y - primaryWord.position.y;
+            const inputKey = `${primaryWord.number}-${index}`;
 
             return (
               <CrosswordCell
@@ -75,11 +106,11 @@ export const CrosswordGrid = ({
                 number={number}
                 value={userInputs[inputKey] || ''}
                 correctValue={cell}
-                isWordChecked={isWordChecked}
+                isWordChecked={isAnyWordChecked}
                 showSolution={false}
-                isWordCorrect={isWordCorrect}
-                onChange={(value) => onInputChange(placedWord.number, index, value)}
-                onKeyDown={onKeyDown(placedWord.number, placedWord.word)}
+                isWordCorrect={areAllCheckedWordsCorrect}
+                onChange={(value) => onInputChange(primaryWord.number, index, value)}
+                onKeyDown={onKeyDown(primaryWord.number, primaryWord.word)}
               />
             );
           })}
