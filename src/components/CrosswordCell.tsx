@@ -26,7 +26,10 @@ export const CrosswordCell = ({
   onKeyDown,
   onFocus
 }: CrosswordCellProps) => {
-  const isCorrect = value.toLowerCase() === correctValue.toLowerCase();
+  // Normalize both strings by trimming whitespace and converting to lowercase
+  const normalizedValue = value.trim().toLowerCase();
+  const normalizedCorrectValue = correctValue.trim().toLowerCase();
+  const isCorrect = normalizedValue === normalizedCorrectValue;
   
   return (
     <div className={cn(
