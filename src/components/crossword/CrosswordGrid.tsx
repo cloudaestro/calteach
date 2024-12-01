@@ -37,12 +37,45 @@ export const CrosswordGrid = ({
     });
   };
 
+  // Helper function to check if a word is correct
+  const isWordCorrect = (word: typeof placedWords[0]) => {
+    return Array.from(word.word).every((letter, idx) => {
+      const inputKey = `${word.number}-${idx}`;
+      const userInput = userInputs[inputKey];
+      
+      // If this cell is shared with another word and has input
+      const pos = word.position.horizontal 
+        ? { x: word.position.x + idx, y: word.position.y }
+        : { x: word.position.x, y: word.position.y + idx };
+      
+      const wordsAtThisCell = getWordsAtCell(pos.x, pos.y);
+      
+      // If this cell is shared and has input from another word
+      if (wordsAtThisCell.length > 1) {
+        const otherWord = wordsAtThisCell.find(w => w.number !== word.number);
+        if (otherWord) {
+          const otherIdx = otherWord.position.horizontal
+            ? pos.x - otherWord.position.x
+            : pos.y - otherWord.position.y;
+          const otherInputKey = `${otherWord.number}-${otherIdx}`;
+          const otherInput = userInputs[otherInputKey];
+          
+          // Use either input if available
+          const effectiveInput = userInput || otherInput || '';
+          return effectiveInput.toLowerCase() === letter.toLowerCase();
+        }
+      }
+      
+      // Normal case - just check this word's input
+      return (userInput || '').toLowerCase() === letter.toLowerCase();
+    });
+  };
+
   return (
     <div className="grid gap-px bg-neutral-200 w-fit mx-auto">
       {grid.map((row, y) => (
         <div key={y} className="flex">
           {row.map((cell, x) => {
-            // Get all words that use this cell
             const wordsAtCell = getWordsAtCell(x, y);
             
             if (!cell) {
@@ -54,7 +87,6 @@ export const CrosswordGrid = ({
               );
             }
 
-            // Get the word number if this is the start of any word
             const number = placedWords.find(
               word => word.position.x === x && word.position.y === y
             )?.number;
@@ -68,30 +100,18 @@ export const CrosswordGrid = ({
               );
             }
 
-            // For each word at this cell, check if it's correct
+            // Check all words at this cell
             const cellStates = wordsAtCell.map(word => {
-              const index = word.position.horizontal
-                ? x - word.position.x
-                : y - word.position.y;
-
-              const inputKey = `${word.number}-${index}`;
-              const isWordChecked = checkedWords[word.number];
-
-              if (!isWordChecked) return null;
-
-              const isWordCorrect = Array.from(word.word).every((letter, idx) => {
-                const input = (userInputs[`${word.number}-${idx}`] || '').trim().toLowerCase();
-                return input === letter.toLowerCase();
-              });
-
-              return { isWordChecked, isWordCorrect };
+              if (!checkedWords[word.number]) return null;
+              return {
+                isWordChecked: true,
+                isWordCorrect: isWordCorrect(word)
+              };
             }).filter(Boolean);
 
-            // Determine the overall state of the cell
             const isAnyWordChecked = cellStates.some(state => state?.isWordChecked);
             const areAllCheckedWordsCorrect = cellStates.every(state => state?.isWordCorrect);
 
-            // Use the first word for input handling
             const primaryWord = wordsAtCell[0];
             const index = primaryWord.position.horizontal
               ? x - primaryWord.position.x
