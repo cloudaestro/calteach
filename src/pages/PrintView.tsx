@@ -22,7 +22,7 @@ const PrintView = () => {
 
   const handlePrint = async () => {
     try {
-      const content = document.querySelector('.printable-content');
+      const content = document.querySelector('.printable-content') as HTMLElement;
       if (!content) {
         throw new Error('Print content not found');
       }
