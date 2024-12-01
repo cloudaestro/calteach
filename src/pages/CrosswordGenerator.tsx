@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
@@ -20,6 +21,11 @@ const CrosswordGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [wordCount, setWordCount] = useState(10);
+
+  const customWordsPlaceholder = 
+`dogs:very good animals
+cats:another very good animals
+birds:flying animals in the sky`;
 
   const getDifficultyPrompt = (difficulty: DifficultyLevel) => {
     switch (difficulty) {
@@ -50,8 +56,15 @@ const CrosswordGenerator = () => {
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
-        words = customWords.split(",").map(word => word.trim()).slice(0, wordCount);
-        descriptions = words.map(word => `Enter the word that means: ${word}`);
+        // Parse custom words and descriptions from the new format
+        const lines = customWords.split("\n").filter(line => line.trim());
+        lines.forEach(line => {
+          const [word, description] = line.split(":").map(part => part.trim());
+          if (word && description) {
+            words.push(word);
+            descriptions.push(description);
+          }
+        });
       }
 
       const crosswordResult = await generateCrossword(words);
@@ -147,15 +160,18 @@ const CrosswordGenerator = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Custom Words</label>
-                <Input
-                  placeholder="Enter words separated by commas"
+                <label className="text-sm font-medium">Custom Words and Descriptions</label>
+                <div className="bg-neutral-50 p-4 rounded-md mb-2">
+                  <h4 className="text-sm font-medium mb-2">Hướng dẫn nhập từ:</h4>
+                  <p className="text-sm text-neutral-600 mb-1">Mỗi dòng nhập một từ theo định dạng: word:description</p>
+                  <p className="text-sm text-neutral-600">Ví dụ: dogs:very good animals</p>
+                </div>
+                <Textarea
+                  placeholder={customWordsPlaceholder}
                   value={customWords}
                   onChange={(e) => setCustomWords(e.target.value)}
+                  className="min-h-[200px] font-mono text-sm"
                 />
-                <p className="text-sm text-neutral-500">
-                  Enter words separated by commas (e.g., cat, dog, bird)
-                </p>
               </div>
             )}
 
