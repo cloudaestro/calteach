@@ -43,12 +43,14 @@ const CrosswordPuzzle = () => {
     const placedWord = crosswordData.placedWords.find(w => w.number === wordNumber);
     if (!placedWord) return false;
 
-    const userWord = Array(word.length).fill('')
-      .map((_, i) => userInputs[`${wordNumber}-${i}`] || '')
-      .join('')
-      .toLowerCase();
+    // Get all letters for this word from user inputs
+    const userWord = word.split('').map((_, index) => {
+      const inputKey = `${wordNumber}-${index}`;
+      return userInputs[inputKey] || '';
+    }).join('');
 
-    return word.toLowerCase() === userWord;
+    // Compare ignoring case and whitespace
+    return word.toLowerCase().trim() === userWord.toLowerCase().trim();
   };
 
   const handleKeyDown = (wordNumber: number, word: string) => (e: React.KeyboardEvent) => {
@@ -68,16 +70,6 @@ const CrosswordPuzzle = () => {
         variant: isCorrect ? "default" : "destructive",
       });
     }
-  };
-
-  const handlePrintWithAnswers = () => {
-    setShowPrintDialog(false);
-    navigate(`/crossword/print-answer/${id}`);
-  };
-
-  const handlePrintWithoutAnswers = () => {
-    setShowPrintDialog(false);
-    navigate(`/crossword/print/${id}`);
   };
 
   if (!crosswordData) {
@@ -156,10 +148,10 @@ const CrosswordPuzzle = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handlePrintWithoutAnswers}>
+            <AlertDialogCancel onClick={() => navigate(`/crossword/print/${id}`)}>
               No, just the puzzle
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handlePrintWithAnswers}>
+            <AlertDialogAction onClick={() => navigate(`/crossword/print-answer/${id}`)}>
               Yes, include answers
             </AlertDialogAction>
           </AlertDialogFooter>
