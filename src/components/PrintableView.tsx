@@ -14,12 +14,7 @@ interface PrintableViewProps {
 export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
   return (
     <div className="print:block hidden">
-      <div className="p-8 bg-white relative">
-        {/* Watermark */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.15] rotate-[-35deg] text-4xl font-bold text-neutral-400 print:block hidden">
-          TeachSheets AI
-        </div>
-
+      <div className="p-8 relative">
         <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
 
         {/* Grid container with outer border */}
@@ -34,7 +29,7 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
                 return cell ? (
                   <div 
                     key={`${x}-${y}`} 
-                    className="w-10 h-10 relative bg-white border-r border-b border-neutral-800"
+                    className="w-10 h-10 relative border-r border-b border-neutral-800"
                     style={{ 
                       borderCollapse: 'collapse',
                       boxSizing: 'border-box'
@@ -49,10 +44,11 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
                 ) : (
                   <div 
                     key={`${x}-${y}`} 
-                    className="w-10 h-10 bg-neutral-800 border-r border-b border-neutral-800"
+                    className="w-10 h-10 border-r border-b border-neutral-800"
                     style={{ 
                       borderCollapse: 'collapse',
-                      boxSizing: 'border-box'
+                      boxSizing: 'border-box',
+                      backgroundColor: '#000'
                     }}
                   />
                 );
