@@ -63,8 +63,8 @@ export const CrosswordGrid = ({
             const isWordChecked = checkedWords[placedWord.number];
 
             const isWordCorrect = isWordChecked && Array.from(placedWord.word).every((letter, idx) => {
-              const input = userInputs[`${placedWord.number}-${idx}`] || '';
-              return input.toLowerCase() === letter.toLowerCase();
+              const input = (userInputs[`${placedWord.number}-${idx}`] || '').trim().toLowerCase();
+              return input === letter.toLowerCase();
             });
 
             return (
