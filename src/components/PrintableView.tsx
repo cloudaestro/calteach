@@ -18,7 +18,7 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
         <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
 
         {/* Grid container with outer border */}
-        <div className="w-fit mx-auto mb-8 border border-neutral-800">
+        <div className="w-fit mx-auto mb-8 border border-neutral-800 print:border-black">
           {grid.map((row, y) => (
             <div key={y} className="flex">
               {row.map((cell, x) => {
@@ -29,14 +29,14 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
                 return cell ? (
                   <div 
                     key={`${x}-${y}`} 
-                    className="w-10 h-10 relative border-r border-b border-neutral-800"
+                    className="w-10 h-10 relative border-r border-b print:border-black border-neutral-800"
                     style={{ 
                       borderCollapse: 'collapse',
                       boxSizing: 'border-box'
                     }}
                   >
                     {number && (
-                      <span className="absolute top-0.5 left-0.5 text-[10px] leading-none font-medium">
+                      <span className="absolute top-0.5 left-0.5 text-[10px] leading-none font-medium print:text-black">
                         {number}
                       </span>
                     )}
@@ -44,7 +44,7 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
                 ) : (
                   <div 
                     key={`${x}-${y}`} 
-                    className="w-10 h-10 border-r border-b border-neutral-800"
+                    className="w-10 h-10 border-r border-b print:border-black border-neutral-800 print:bg-black"
                     style={{ 
                       borderCollapse: 'collapse',
                       boxSizing: 'border-box',
