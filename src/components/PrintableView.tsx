@@ -15,6 +15,11 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
   return (
     <div className="print:block hidden">
       <div className="p-8 bg-white relative">
+        {/* Watermark */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.15] rotate-[-35deg] text-4xl font-bold text-neutral-400 print:block hidden">
+          TeachSheets AI
+        </div>
+
         <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
 
         <div className="grid gap-px bg-neutral-200 w-fit mx-auto mb-8">
