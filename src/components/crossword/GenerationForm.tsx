@@ -22,9 +22,9 @@ export const GenerationForm = ({ onGenerate, isGenerating }: GenerationFormProps
   };
 
   const customWordsPlaceholder = 
-`Từ 1: cat:A small furry pet that meows
-Từ 2: dog:A loyal companion animal that barks
-Từ 3: bird:A feathered creature that can fly`;
+`dogs:very good animals
+cats:another very good animals
+birds:flying animals in the sky`;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -55,8 +55,8 @@ Từ 3: bird:A feathered creature that can fly`;
           <label className="text-sm font-medium">Custom Words and Descriptions</label>
           <div className="bg-neutral-50 p-4 rounded-md mb-2">
             <h4 className="text-sm font-medium mb-2">Hướng dẫn nhập từ:</h4>
-            <p className="text-sm text-neutral-600 mb-1">1. Mỗi dòng nhập một từ theo định dạng: Từ số N: word:description</p>
-            <p className="text-sm text-neutral-600">Ví dụ: Từ 1: cat:A small furry pet that meows</p>
+            <p className="text-sm text-neutral-600 mb-1">Mỗi dòng nhập một từ theo định dạng: word:description</p>
+            <p className="text-sm text-neutral-600">Ví dụ: dogs:very good animals</p>
           </div>
           <Textarea
             placeholder={customWordsPlaceholder}
