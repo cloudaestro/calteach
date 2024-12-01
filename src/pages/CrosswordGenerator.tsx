@@ -23,9 +23,9 @@ const CrosswordGenerator = () => {
   const [wordCount, setWordCount] = useState(10);
 
   const customWordsPlaceholder = 
-`dogs:very good animals
-cats:another very good animals
-birds:flying animals in the sky`;
+`dog:a faithful companion animal
+cat:an independent feline pet
+bird:a feathered flying creature`;
 
   const getDifficultyPrompt = (difficulty: DifficultyLevel) => {
     switch (difficulty) {
@@ -162,9 +162,9 @@ birds:flying animals in the sky`;
               <div className="space-y-2">
                 <label className="text-sm font-medium">Custom Words and Descriptions</label>
                 <div className="bg-neutral-50 p-4 rounded-md mb-2">
-                  <h4 className="text-sm font-medium mb-2">Hướng dẫn nhập từ:</h4>
-                  <p className="text-sm text-neutral-600 mb-1">Mỗi dòng nhập một từ theo định dạng: word:description</p>
-                  <p className="text-sm text-neutral-600">Ví dụ: dogs:very good animals</p>
+                  <h4 className="text-sm font-medium mb-2">Input Instructions:</h4>
+                  <p className="text-sm text-neutral-600 mb-1">Enter one word per line using the format: word:description</p>
+                  <p className="text-sm text-neutral-600">Example: dog:a faithful companion animal</p>
                 </div>
                 <Textarea
                   placeholder={customWordsPlaceholder}
