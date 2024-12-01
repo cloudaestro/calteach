@@ -1,10 +1,14 @@
 import { Position } from './crosswordTypes';
 
 export const findIntersections = (word1: string, word2: string): [number, number][] => {
+  if (!word1 || !word2) return [];
+  
   const intersections: [number, number][] = [];
   for (let i = 0; i < word1.length; i++) {
     for (let j = 0; j < word2.length; j++) {
-      if (word1[i].toLowerCase() === word2[j].toLowerCase()) {
+      const char1 = word1[i]?.toLowerCase();
+      const char2 = word2[j]?.toLowerCase();
+      if (char1 && char2 && char1 === char2) {
         intersections.push([i, j]);
       }
     }
@@ -38,6 +42,8 @@ export const calculatePosition = (
 };
 
 export const canPlaceWord = (grid: string[][], word: string, pos: Position): boolean => {
+  if (!word || !grid || !pos) return false;
+
   // Check if word fits within grid bounds
   if (pos.x < 0 || pos.y < 0 || 
       (pos.horizontal && pos.x + word.length > grid[0].length) ||
@@ -50,8 +56,14 @@ export const canPlaceWord = (grid: string[][], word: string, pos: Position): boo
     const x = pos.horizontal ? pos.x + i : pos.x;
     const y = pos.horizontal ? pos.y : pos.y + i;
     
+    if (!grid[y] || !grid[y][x]) return false;
+
     // Check if current position conflicts with existing letters
-    if (grid[y][x] !== '' && grid[y][x].toLowerCase() !== word[i].toLowerCase()) {
+    const currentCell = grid[y][x];
+    const currentChar = word[i];
+    
+    if (currentCell !== '' && 
+        currentCell?.toLowerCase() !== currentChar?.toLowerCase()) {
       return false;
     }
 
@@ -95,20 +107,33 @@ const isValidAdjacent = (grid: string[][], x: number, y: number, isHorizontal: b
 };
 
 export const placeWord = (grid: string[][], word: string, pos: Position): void => {
+  if (!word || !grid || !pos) return;
+
   for (let i = 0; i < word.length; i++) {
     const x = pos.horizontal ? pos.x + i : pos.x;
     const y = pos.horizontal ? pos.y : pos.y + i;
-    grid[y][x] = word[i];
+    
+    if (grid[y] && grid[y][x] !== undefined) {
+      grid[y][x] = word[i];
+    }
   }
 };
 
 export const countIntersections = (grid: string[][], word: string, pos: Position): number => {
+  if (!word || !grid || !pos) return 0;
+
   let count = 0;
   for (let i = 0; i < word.length; i++) {
     const x = pos.horizontal ? pos.x + i : pos.x;
     const y = pos.horizontal ? pos.y : pos.y + i;
     
-    if (grid[y][x] !== '' && grid[y][x].toLowerCase() === word[i].toLowerCase()) {
+    if (!grid[y] || !grid[y][x]) continue;
+    
+    const currentCell = grid[y][x];
+    const currentChar = word[i];
+    
+    if (currentCell !== '' && 
+        currentCell?.toLowerCase() === currentChar?.toLowerCase()) {
       count++;
     }
   }
