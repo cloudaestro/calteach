@@ -81,5 +81,14 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function({ addUtilities }) {
+      addUtilities({
+        '.page-break-before-always': {
+          'page-break-before': 'always',
+        },
+      });
+    },
+  ],
 } satisfies Config;

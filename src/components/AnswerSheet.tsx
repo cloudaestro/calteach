@@ -18,7 +18,7 @@ interface AnswerSheetProps {
 export const AnswerSheet = ({ placedWords }: AnswerSheetProps) => {
   return (
     <div className="print:block hidden">
-      <div className="p-8 bg-white relative page-break-before">
+      <div className="p-8 bg-white relative page-break-before-always">
         {/* Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.15] rotate-[-35deg] text-4xl font-bold text-neutral-400 print:block hidden">
           TeachSheets AI
