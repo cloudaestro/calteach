@@ -2,14 +2,6 @@ import { motion } from "framer-motion";
 import { FileText, Layout, Printer, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
-
-// Declare the adsbygoogle type on window
-declare global {
-  interface Window {
-    adsbygoogle: any[];
-  }
-}
 
 const features = [
   {
@@ -38,24 +30,9 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  useEffect(() => {
-    // Load Google AdSense script
-    const script = document.createElement('script');
-    script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5389521389166416";
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    document.head.appendChild(script);
-
-    // Initialize ads
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (err) {
-      console.error('AdSense error:', err);
-    }
-  }, []);
-
   const handleGetStarted = () => {
     if (user) {
+      // Navigate to worksheet creator (to be implemented)
       navigate("/create");
     } else {
       navigate("/login");
@@ -141,17 +118,6 @@ const Index = () => {
               </button>
             </div>
           </motion.div>
-
-          {/* Google AdSense Ad Unit */}
-          <div className="my-8 text-center">
-            <ins className="adsbygoogle"
-                style={{ display: 'block' }}
-                data-ad-client="ca-pub-5389521389166416"
-                data-ad-slot="9960216737"
-                data-ad-format="auto"
-                data-full-width-responsive="true">
-            </ins>
-          </div>
         </section>
 
         <section className="container mx-auto px-4 py-24 bg-neutral-50">
