@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
@@ -7,7 +6,6 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CrosswordGenerator from "./pages/CrosswordGenerator";
 import CrosswordPuzzle from "./pages/CrosswordPuzzle";
-import PrintView from "./pages/PrintView";
 
 function App() {
   return (
@@ -20,7 +18,6 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/crossword" element={<CrosswordGenerator />} />
           <Route path="/crossword/:id" element={<CrosswordPuzzle />} />
-          <Route path="/print" element={<PrintView />} />
         </Routes>
       </AuthProvider>
     </Router>

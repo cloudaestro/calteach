@@ -7,14 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { generateWorksheet } from "@/lib/gemini";
 import { generateCrossword } from "@/lib/crosswordGenerator";
-import { useToast } from "@/hooks/use-toast";
 
 type WordGenerationMode = "ai" | "custom";
 type DifficultyLevel = "easy" | "medium" | "hard";
 
 const CrosswordGenerator = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [mode, setMode] = useState<WordGenerationMode>("ai");
   const [topic, setTopic] = useState("");
   const [customWords, setCustomWords] = useState("");
@@ -43,39 +41,16 @@ const CrosswordGenerator = () => {
       
       if (mode === "ai") {
         const difficultyDesc = getDifficultyPrompt(difficulty);
-        // Modified prompt to ensure we get exactly the number of words requested
-        const wordsPrompt = `Generate exactly ${wordCount} different ${difficultyDesc} words related to ${topic}. Return ONLY the specific words separated by commas, no explanations. Each word should be between 3 and 15 letters long.`;
+        const wordsPrompt = `Generate ${wordCount} ${difficultyDesc} ${topic}. Return only the specific names separated by commas, no explanations or descriptions. For example, if the topic is "Animals", return "lion, tiger, elephant" etc.`;
         const wordsResponse = await generateWorksheet(wordsPrompt);
-        words = wordsResponse.split(",")
-          .map(word => word.trim())
-          .filter(word => word.length >= 3 && word.length <= 15)
-          .slice(0, wordCount);
-
-        // If we didn't get enough words, request more
-        if (words.length < wordCount) {
-          const remainingCount = wordCount - words.length;
-          const additionalPrompt = `Generate ${remainingCount} more different ${difficultyDesc} words related to ${topic}. Return ONLY the words separated by commas.`;
-          const additionalResponse = await generateWorksheet(additionalPrompt);
-          const additionalWords = additionalResponse.split(",")
-            .map(word => word.trim())
-            .filter(word => word.length >= 3 && word.length <= 15)
-            .slice(0, remainingCount);
-          words = [...words, ...additionalWords];
-        }
+        words = wordsResponse.split(",").map(word => word.trim()).slice(0, wordCount);
         
-        const descriptionsPrompt = `For each of these ${topic} words: ${words.join(", ")}, generate a clear, concise clue that would be suitable for a crossword puzzle. Each clue should be specific and helpful. Return only the clues separated by semicolons, in the same order as the words.`;
+        const descriptionsPrompt = `For each of these ${topic}: ${words.join(", ")}, generate a simple, direct description that clearly identifies what it is. Each description should start with "A/An" and be factual. For example: "A large African cat with a mane" for lion. Return only the descriptions separated by semicolons, in the same order as the words.`;
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
-        words = customWords.split(",")
-          .map(word => word.trim())
-          .filter(word => word.length >= 3 && word.length <= 15)
-          .slice(0, wordCount);
+        words = customWords.split(",").map(word => word.trim()).slice(0, wordCount);
         descriptions = words.map(word => `Enter the word that means: ${word}`);
-      }
-
-      if (words.length < 3) {
-        throw new Error("Not enough valid words generated. Please try again.");
       }
 
       const crosswordResult = await generateCrossword(words);
@@ -96,11 +71,6 @@ const CrosswordGenerator = () => {
       navigate(`/crossword/${puzzleId}`);
     } catch (error) {
       console.error("Error generating crossword:", error);
-      toast({
-        title: "Error",
-        description: "Failed to generate crossword puzzle. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setIsGenerating(false);
     }
