@@ -39,20 +39,21 @@ const CrosswordPuzzle = () => {
     }
   }, [id]);
 
-  const checkWord = (word: string, userWord: string) => {
-    return word.toLowerCase() === userWord.toLowerCase();
+  const checkWord = (wordNumber: number, word: string) => {
+    const placedWord = crosswordData.placedWords.find(w => w.number === wordNumber);
+    if (!placedWord) return false;
+
+    const userWord = Array(word.length).fill('')
+      .map((_, i) => userInputs[`${wordNumber}-${i}`] || '')
+      .join('')
+      .toLowerCase();
+
+    return word.toLowerCase() === userWord;
   };
 
   const handleKeyDown = (wordNumber: number, word: string) => (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      const placedWord = crosswordData.placedWords.find(w => w.number === wordNumber);
-      if (!placedWord) return;
-
-      const userWord = Array(word.length).fill('')
-        .map((_, i) => userInputs[`${wordNumber}-${i}`] || '')
-        .join('');
-
-      const isCorrect = checkWord(placedWord.word, userWord);
+      const isCorrect = checkWord(wordNumber, word);
       
       setCheckedWords(prev => ({
         ...prev,
