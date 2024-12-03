@@ -22,17 +22,17 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
 
         <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
 
-        {/* Centered puzzle grid with fixed cell dimensions */}
+        {/* Centered puzzle grid with strict grid layout */}
         <div className="flex justify-center mb-8">
           <div 
-            className="grid grid-flow-row auto-rows-[25px] border border-neutral-300"
             style={{ 
               display: 'grid',
-              gridAutoFlow: 'row',
-              gridTemplateColumns: `repeat(${grid[0].length}, 25px)` 
+              gridTemplateColumns: `repeat(${grid[0].length}, 25px)`,
+              border: '1px solid #D4D4D4',
+              width: 'fit-content'
             }}
           >
-            {grid.map((row, y) => (
+            {grid.map((row, y) => 
               row.map((cell, x) => {
                 const number = placedWords.find(
                   word => word.position.x === x && word.position.y === y
@@ -41,11 +41,25 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
                 return cell ? (
                   <div 
                     key={`${x}-${y}`} 
-                    className="relative bg-white border-r border-b border-neutral-300 last:border-r-0"
-                    style={{ width: '25px', height: '25px' }}
+                    style={{
+                      width: '25px',
+                      height: '25px',
+                      borderRight: '1px solid #D4D4D4',
+                      borderBottom: '1px solid #D4D4D4',
+                      backgroundColor: 'white',
+                      position: 'relative'
+                    }}
                   >
                     {number && (
-                      <span className="absolute top-0.5 left-0.5 text-[8px] leading-none">
+                      <span 
+                        style={{
+                          position: 'absolute',
+                          top: '2px',
+                          left: '2px',
+                          fontSize: '8px',
+                          lineHeight: 1
+                        }}
+                      >
                         {number}
                       </span>
                     )}
@@ -53,12 +67,17 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
                 ) : (
                   <div 
                     key={`${x}-${y}`} 
-                    className="bg-neutral-800 border-r border-b border-neutral-300 last:border-r-0"
-                    style={{ width: '25px', height: '25px' }}
+                    style={{
+                      width: '25px',
+                      height: '25px',
+                      borderRight: '1px solid #D4D4D4',
+                      borderBottom: '1px solid #D4D4D4',
+                      backgroundColor: '#2C3333'
+                    }}
                   />
                 );
               })
-            ))}
+            )}
           </div>
         </div>
 
