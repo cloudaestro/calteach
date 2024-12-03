@@ -46,6 +46,13 @@ export const GridCell = ({
     );
   }
 
+  // Prioritize horizontal words when both directions are available
+  const primaryWord = wordsAtCell.find(word => word.position.horizontal) || wordsAtCell[0];
+  const index = primaryWord.position.horizontal
+    ? x - primaryWord.position.x
+    : y - primaryWord.position.y;
+  const inputKey = `${primaryWord.number}-${index}`;
+
   // Check all words at this cell
   const cellStates = wordsAtCell.map(word => {
     if (!checkedWords[word.number]) return null;
@@ -57,12 +64,6 @@ export const GridCell = ({
 
   const isAnyWordChecked = cellStates.some(state => state?.isWordChecked);
   const areAllCheckedWordsCorrect = cellStates.every(state => state?.isWordCorrect);
-
-  const primaryWord = wordsAtCell[0];
-  const index = primaryWord.position.horizontal
-    ? x - primaryWord.position.x
-    : y - primaryWord.position.y;
-  const inputKey = `${primaryWord.number}-${index}`;
 
   return (
     <CrosswordCell
