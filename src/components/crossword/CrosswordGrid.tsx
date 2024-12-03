@@ -73,7 +73,7 @@ export const CrosswordGrid = ({
     });
   };
 
-  // Function to find and focus the next cell
+  // Function to find and focus the next cell within the same word
   const focusNextCell = (wordNumber: number, currentIndex: number) => {
     const word = placedWords.find(w => w.number === wordNumber);
     if (!word) return;
@@ -87,6 +87,14 @@ export const CrosswordGrid = ({
         nextCell.focus();
       }
     }
+  };
+
+  // Function to get current index within word
+  const getCurrentIndex = (word: typeof placedWords[0], x: number, y: number) => {
+    if (word.position.horizontal) {
+      return x - word.position.x;
+    }
+    return y - word.position.y;
   };
 
   // Enhanced input change handler
