@@ -46,8 +46,38 @@ export const GridCell = ({
     );
   }
 
-  // Prioritize horizontal words when both directions are available
-  const primaryWord = wordsAtCell.find(word => word.position.horizontal) || wordsAtCell[0];
+  // Find both horizontal and vertical words at this cell
+  const horizontalWord = wordsAtCell.find(word => word.position.horizontal);
+  const verticalWord = wordsAtCell.find(word => !word.position.horizontal);
+
+  // Determine which word to use based on current input context
+  // If there's only one word, use that
+  // If there are both, check if we're in the middle of filling either word
+  const primaryWord = (() => {
+    if (wordsAtCell.length === 1) return wordsAtCell[0];
+    
+    // Check if we're in the middle of filling either word
+    const horizontalIndex = horizontalWord ? x - horizontalWord.position.x : -1;
+    const verticalIndex = verticalWord ? y - verticalWord.position.y : -1;
+    
+    const isFillingHorizontal = horizontalWord && Array.from(horizontalWord.word).some((_, idx) => {
+      const key = `${horizontalWord.number}-${idx}`;
+      return userInputs[key];
+    });
+    
+    const isFillingVertical = verticalWord && Array.from(verticalWord.word).some((_, idx) => {
+      const key = `${verticalWord.number}-${idx}`;
+      return userInputs[key];
+    });
+
+    // Prioritize the word that's being filled
+    if (isFillingHorizontal && !isFillingVertical) return horizontalWord;
+    if (isFillingVertical && !isFillingHorizontal) return verticalWord;
+    
+    // If neither or both are being filled, prefer the one that has this cell's position
+    return horizontalWord || verticalWord;
+  })();
+
   const index = primaryWord.position.horizontal
     ? x - primaryWord.position.x
     : y - primaryWord.position.y;
