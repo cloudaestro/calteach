@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { CrosswordCell } from '../CrosswordCell';
 
 interface CrosswordGridProps {
@@ -22,6 +22,8 @@ export const CrosswordGrid = ({
   onInputChange,
   onKeyDown 
 }: CrosswordGridProps) => {
+  const currentWordRef = useRef<{ number: number; horizontal: boolean } | null>(null);
+
   // Helper function to get all words that use a specific cell
   const getWordsAtCell = (x: number, y: number) => {
     return placedWords.filter(word => {
@@ -69,6 +71,33 @@ export const CrosswordGrid = ({
       // Normal case - just check this word's input
       return (userInput || '').toLowerCase() === letter.toLowerCase();
     });
+  };
+
+  // Function to find the next cell in the current word
+  const focusNextCell = (wordNumber: number, currentIndex: number) => {
+    const word = placedWords.find(w => w.number === wordNumber);
+    if (!word) return;
+
+    // Find the next empty cell in the word
+    for (let i = currentIndex + 1; i < word.word.length; i++) {
+      const key = `${wordNumber}-${i}`;
+      if (!userInputs[key]) {
+        // Find and focus the input element
+        const nextCell = document.querySelector(`[data-cell="${key}"]`) as HTMLInputElement;
+        if (nextCell) {
+          nextCell.focus();
+          break;
+        }
+      }
+    }
+  };
+
+  // Enhanced input change handler
+  const handleInputChange = (wordNumber: number, index: number, value: string) => {
+    onInputChange(wordNumber, index, value);
+    if (value) {
+      focusNextCell(wordNumber, index);
+    }
   };
 
   return (
@@ -129,8 +158,14 @@ export const CrosswordGrid = ({
                 isWordChecked={isAnyWordChecked}
                 showSolution={false}
                 isWordCorrect={areAllCheckedWordsCorrect}
-                onChange={(value) => onInputChange(primaryWord.number, index, value)}
+                onChange={(value) => handleInputChange(primaryWord.number, index, value)}
                 onKeyDown={onKeyDown(primaryWord.number, primaryWord.word)}
+                onFocus={() => {
+                  currentWordRef.current = {
+                    number: primaryWord.number,
+                    horizontal: primaryWord.position.horizontal
+                  };
+                }}
               />
             );
           })}

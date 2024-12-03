@@ -16,6 +16,9 @@ interface AnswerSheetProps {
 }
 
 export const AnswerSheet = ({ placedWords }: AnswerSheetProps) => {
+  // Sort words by their number
+  const sortedWords = [...placedWords].sort((a, b) => a.number - b.number);
+
   return (
     <div className="print:block hidden">
       <div className="p-8 bg-white relative page-break-before-always">
@@ -27,7 +30,7 @@ export const AnswerSheet = ({ placedWords }: AnswerSheetProps) => {
         <h1 className="text-2xl font-bold mb-6 text-center">Answer Sheet</h1>
 
         <div className="grid grid-cols-2 gap-4">
-          {placedWords.map((word, index) => (
+          {sortedWords.map((word, index) => (
             <div key={index} className="flex gap-2">
               <span className="font-bold">{word.number}.</span>
               <span className="uppercase">{word.word}</span>
