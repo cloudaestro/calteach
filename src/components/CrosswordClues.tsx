@@ -1,46 +1,46 @@
 import React from 'react';
 
-interface PlacedWord {
-  word: string;
-  position: {
-    x: number;
-    y: number;
-    horizontal: boolean;
-  };
-  number: number;
-  description?: string;
-}
-
 interface CrosswordCluesProps {
-  placedWords: PlacedWord[];
+  placedWords: Array<{
+    word: string;
+    position: { x: number; y: number; horizontal: boolean };
+    number: number;
+    description?: string;
+  }>;
 }
 
-export const CrosswordClues = ({ placedWords }: CrosswordCluesProps) => {
+export const CrosswordClues: React.FC<CrosswordCluesProps> = ({ placedWords }) => {
+  const horizontalWords = placedWords.filter(word => word.position.horizontal);
+  const verticalWords = placedWords.filter(word => !word.position.horizontal);
+
   return (
-    <div className="mt-6 space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-2 print:gap-4">
       <div>
-        <h4 className="font-medium mb-2">Across:</h4>
-        <ul className="space-y-1">
-          {placedWords
-            .filter(word => word.position.horizontal)
-            .map(word => (
-              <li key={word.number} className="text-sm">
-                {word.number}. {word.description}
-              </li>
+        <h3 className="font-bold mb-2 text-lg">Across</h3>
+        <div className="space-y-2">
+          {horizontalWords
+            .sort((a, b) => a.number - b.number)
+            .map((word) => (
+              <div key={word.number} className="flex">
+                <span className="font-medium min-w-[2rem]">{word.number}.</span>
+                <span>{word.description || word.word}</span>
+              </div>
             ))}
-        </ul>
+        </div>
       </div>
+
       <div>
-        <h4 className="font-medium mb-2">Down:</h4>
-        <ul className="space-y-1">
-          {placedWords
-            .filter(word => !word.position.horizontal)
-            .map(word => (
-              <li key={word.number} className="text-sm">
-                {word.number}. {word.description}
-              </li>
+        <h3 className="font-bold mb-2 text-lg">Down</h3>
+        <div className="space-y-2">
+          {verticalWords
+            .sort((a, b) => a.number - b.number)
+            .map((word) => (
+              <div key={word.number} className="flex">
+                <span className="font-medium min-w-[2rem]">{word.number}.</span>
+                <span>{word.description || word.word}</span>
+              </div>
             ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
