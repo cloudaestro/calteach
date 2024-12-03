@@ -30,7 +30,9 @@ export const CrosswordCell = ({
 }: CrosswordCellProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.slice(-1).toUpperCase();
-    onChange(newValue);
+    if (newValue) {
+      onChange(newValue);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -67,6 +69,7 @@ export const CrosswordCell = ({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onFocus={onFocus}
+        data-cell={`cell-${x}-${y}`}
       />
     </div>
   );

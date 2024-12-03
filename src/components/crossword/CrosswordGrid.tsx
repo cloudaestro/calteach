@@ -73,21 +73,18 @@ export const CrosswordGrid = ({
     });
   };
 
-  // Function to find the next cell in the current word
+  // Function to find and focus the next cell
   const focusNextCell = (wordNumber: number, currentIndex: number) => {
     const word = placedWords.find(w => w.number === wordNumber);
     if (!word) return;
 
-    // Find the next empty cell in the word
-    for (let i = currentIndex + 1; i < word.word.length; i++) {
-      const key = `${wordNumber}-${i}`;
-      if (!userInputs[key]) {
-        // Find and focus the input element
-        const nextCell = document.querySelector(`[data-cell="${key}"]`) as HTMLInputElement;
-        if (nextCell) {
-          nextCell.focus();
-          break;
-        }
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < word.word.length) {
+      const nextX = word.position.horizontal ? word.position.x + nextIndex : word.position.x;
+      const nextY = word.position.horizontal ? word.position.y : word.position.y + nextIndex;
+      const nextCell = document.querySelector(`[data-cell="cell-${nextX}-${nextY}"]`) as HTMLInputElement;
+      if (nextCell) {
+        nextCell.focus();
       }
     }
   };
@@ -166,6 +163,7 @@ export const CrosswordGrid = ({
                     horizontal: primaryWord.position.horizontal
                   };
                 }}
+                data-cell={`cell-${x}-${y}`}
               />
             );
           })}
