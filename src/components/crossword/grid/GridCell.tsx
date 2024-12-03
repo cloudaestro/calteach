@@ -51,30 +51,54 @@ export const GridCell = ({
   const verticalWord = wordsAtCell.find(word => !word.position.horizontal);
 
   // Determine which word to use based on current input context
-  // If there's only one word, use that
-  // If there are both, check if we're in the middle of filling either word
   const primaryWord = (() => {
     if (wordsAtCell.length === 1) return wordsAtCell[0];
     
-    // Check if we're in the middle of filling either word
-    const horizontalIndex = horizontalWord ? x - horizontalWord.position.x : -1;
-    const verticalIndex = verticalWord ? y - verticalWord.position.y : -1;
-    
-    const isFillingHorizontal = horizontalWord && Array.from(horizontalWord.word).some((_, idx) => {
-      const key = `${horizontalWord.number}-${idx}`;
-      return userInputs[key];
-    });
-    
-    const isFillingVertical = verticalWord && Array.from(verticalWord.word).some((_, idx) => {
-      const key = `${verticalWord.number}-${idx}`;
-      return userInputs[key];
-    });
+    // If we have both horizontal and vertical words
+    if (horizontalWord && verticalWord) {
+      // Calculate indices for both words
+      const horizontalIndex = x - horizontalWord.position.x;
+      const verticalIndex = y - verticalWord.position.y;
+      
+      // Check if either word has started being filled
+      const isHorizontalStarted = Array.from(horizontalWord.word).some((_, idx) => {
+        const key = `${horizontalWord.number}-${idx}`;
+        return userInputs[key];
+      });
+      
+      const isVerticalStarted = Array.from(verticalWord.word).some((_, idx) => {
+        const key = `${verticalWord.number}-${idx}`;
+        return userInputs[key];
+      });
 
-    // Prioritize the word that's being filled
-    if (isFillingHorizontal && !isFillingVertical) return horizontalWord;
-    if (isFillingVertical && !isFillingHorizontal) return verticalWord;
+      // If only one word has started being filled, use that one
+      if (isHorizontalStarted && !isVerticalStarted) return horizontalWord;
+      if (isVerticalStarted && !isHorizontalStarted) return verticalWord;
+      
+      // If neither word has started or both have started,
+      // check if we're at the start of either word
+      const isHorizontalStart = horizontalIndex === 0;
+      const isVerticalStart = verticalIndex === 0;
+      
+      if (isHorizontalStart && !isVerticalStart) return horizontalWord;
+      if (isVerticalStart && !isHorizontalStart) return verticalWord;
+      
+      // If we're still undecided, check which word has more filled cells
+      const horizontalFilled = Array.from(horizontalWord.word).filter((_, idx) => {
+        const key = `${horizontalWord.number}-${idx}`;
+        return userInputs[key];
+      }).length;
+      
+      const verticalFilled = Array.from(verticalWord.word).filter((_, idx) => {
+        const key = `${verticalWord.number}-${idx}`;
+        return userInputs[key];
+      }).length;
+      
+      if (horizontalFilled > verticalFilled) return horizontalWord;
+      if (verticalFilled > horizontalFilled) return verticalWord;
+    }
     
-    // If neither or both are being filled, prefer the one that has this cell's position
+    // Default to horizontal if we can't decide
     return horizontalWord || verticalWord;
   })();
 
