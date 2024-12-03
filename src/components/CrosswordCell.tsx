@@ -17,6 +17,8 @@ interface CrosswordCellProps {
 }
 
 export const CrosswordCell = ({
+  x,
+  y,
   number,
   value,
   correctValue,
