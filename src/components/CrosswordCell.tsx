@@ -35,12 +35,12 @@ export const CrosswordCell = ({
 
   return (
     <div className={cn(
-      "w-8 h-8 relative bg-white border border-neutral-300 print:w-10 print:h-10 print:bg-white print:border-black",
-      isPartOfCurrentWord && "bg-blue-50 print:bg-white",
-      isWordChecked && (isWordCorrect ? "bg-green-100 print:bg-white" : "bg-red-100 print:bg-white")
+      "w-8 h-8 relative bg-white border border-neutral-300 print:w-10 print:h-10",
+      isPartOfCurrentWord && "bg-blue-50",
+      isWordChecked && (isWordCorrect ? "bg-green-100" : "bg-red-100")
     )}>
       {number && (
-        <span className="absolute top-0 left-0 text-[8px] print:text-[10px] p-[2px] print:text-black">
+        <span className="absolute top-0 left-0 text-[8px] print:text-[10px] p-[2px]">
           {number}
         </span>
       )}
@@ -48,9 +48,9 @@ export const CrosswordCell = ({
         type="text"
         maxLength={1}
         className={cn(
-          "w-full h-full text-center uppercase bg-transparent focus:outline-none transition-colors duration-200 print:text-black",
-          isWordChecked && (isWordCorrect ? "text-green-700 print:text-black" : "text-red-700 print:text-black"),
-          showSolution && !value && "text-gray-500 print:text-black"
+          "w-full h-full text-center uppercase bg-transparent focus:outline-none transition-colors duration-200",
+          isWordChecked && (isWordCorrect ? "text-green-700" : "text-red-700"),
+          showSolution && !value && "text-gray-500"
         )}
         value={showSolution && !value ? correctValue : value}
         onChange={handleChange}

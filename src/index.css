@@ -44,9 +44,6 @@
   
   body {
     visibility: visible !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    background-color: white !important;
   }
   
   .print\:hidden {
@@ -84,17 +81,5 @@
   
   .print\:max-w-none {
     max-width: none !important;
-  }
-
-  .print\:border-black {
-    border-color: black !important;
-  }
-
-  .print\:bg-black {
-    background-color: black !important;
-  }
-
-  .print\:text-black {
-    color: black !important;
   }
 }
