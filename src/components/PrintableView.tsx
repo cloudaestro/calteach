@@ -22,63 +22,51 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
 
         <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
 
-        {/* Centered puzzle grid with strict grid layout */}
+        {/* Print-optimized puzzle grid */}
         <div className="flex justify-center mb-8">
-          <div 
-            style={{ 
-              display: 'grid',
-              gridTemplateColumns: `repeat(${grid[0].length}, 25px)`,
-              border: '1px solid #D4D4D4',
-              width: 'fit-content'
-            }}
-          >
-            {grid.map((row, y) => 
-              row.map((cell, x) => {
-                const number = placedWords.find(
-                  word => word.position.x === x && word.position.y === y
-                )?.number;
+          <table cellSpacing="0" cellPadding="0" style={{ borderCollapse: 'collapse', border: '1px solid #000' }}>
+            <tbody>
+              {grid.map((row, y) => (
+                <tr key={y}>
+                  {row.map((cell, x) => {
+                    const number = placedWords.find(
+                      word => word.position.x === x && word.position.y === y
+                    )?.number;
 
-                return cell ? (
-                  <div 
-                    key={`${x}-${y}`} 
-                    style={{
-                      width: '25px',
-                      height: '25px',
-                      borderRight: '1px solid #D4D4D4',
-                      borderBottom: '1px solid #D4D4D4',
-                      backgroundColor: 'white',
-                      position: 'relative'
-                    }}
-                  >
-                    {number && (
-                      <span 
+                    return (
+                      <td 
+                        key={`${x}-${y}`}
                         style={{
-                          position: 'absolute',
-                          top: '2px',
-                          left: '2px',
-                          fontSize: '8px',
-                          lineHeight: 1
+                          width: '25px',
+                          height: '25px',
+                          border: '1px solid #000',
+                          padding: 0,
+                          position: 'relative',
+                          backgroundColor: cell ? 'white' : '#2C3333',
+                          minWidth: '25px',
+                          maxWidth: '25px',
+                          minHeight: '25px',
+                          maxHeight: '25px'
                         }}
                       >
-                        {number}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div 
-                    key={`${x}-${y}`} 
-                    style={{
-                      width: '25px',
-                      height: '25px',
-                      borderRight: '1px solid #D4D4D4',
-                      borderBottom: '1px solid #D4D4D4',
-                      backgroundColor: '#2C3333'
-                    }}
-                  />
-                );
-              })
-            )}
-          </div>
+                        {cell && number && (
+                          <span style={{
+                            position: 'absolute',
+                            top: '1px',
+                            left: '1px',
+                            fontSize: '8px',
+                            lineHeight: '8px'
+                          }}>
+                            {number}
+                          </span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         <CrosswordClues placedWords={placedWords} />
