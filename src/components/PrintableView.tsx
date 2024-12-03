@@ -22,35 +22,39 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
 
         <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
 
-        {/* Updated grid styling for perfect alignment */}
-        <div className="grid gap-0 w-fit mx-auto mb-8 border border-neutral-300">
-          {grid.map((row, y) => (
-            <div key={y} className="flex">
-              {row.map((cell, x) => {
-                const number = placedWords.find(
-                  word => word.position.x === x && word.position.y === y
-                )?.number;
+        {/* Centered puzzle grid with fixed dimensions */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-block">
+            <div className="grid gap-0 border border-neutral-300">
+              {grid.map((row, y) => (
+                <div key={y} className="flex">
+                  {row.map((cell, x) => {
+                    const number = placedWords.find(
+                      word => word.position.x === x && word.position.y === y
+                    )?.number;
 
-                return cell ? (
-                  <div 
-                    key={`${x}-${y}`} 
-                    className="w-10 h-10 relative bg-white border-r border-b border-neutral-300 last:border-r-0"
-                  >
-                    {number && (
-                      <span className="absolute top-0.5 left-0.5 text-[10px] leading-none">
-                        {number}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div 
-                    key={`${x}-${y}`} 
-                    className="w-10 h-10 bg-neutral-800 border-r border-b border-neutral-300 last:border-r-0" 
-                  />
-                );
-              })}
+                    return cell ? (
+                      <div 
+                        key={`${x}-${y}`} 
+                        className="w-[30px] h-[30px] relative bg-white border-r border-b border-neutral-300 last:border-r-0 print:w-[25px] print:h-[25px]"
+                      >
+                        {number && (
+                          <span className="absolute top-0.5 left-0.5 text-[8px] leading-none">
+                            {number}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div 
+                        key={`${x}-${y}`} 
+                        className="w-[30px] h-[30px] bg-neutral-800 border-r border-b border-neutral-300 last:border-r-0 print:w-[25px] print:h-[25px]" 
+                      />
+                    );
+                  })}
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
 
         <CrosswordClues placedWords={placedWords} />
