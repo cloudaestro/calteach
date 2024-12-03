@@ -14,30 +14,30 @@ export const CrosswordClues: React.FC<CrosswordCluesProps> = ({ placedWords }) =
   const verticalWords = placedWords.filter(word => !word.position.horizontal);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-2 print:gap-4">
-      <div>
-        <h3 className="font-bold mb-2 text-lg">Across</h3>
-        <div className="space-y-2">
+    <div className="flex flex-col md:flex-row print:flex-row w-full gap-8 print:gap-16">
+      <div className="flex-1">
+        <h3 className="font-bold mb-4 text-lg border-b pb-2">Across</h3>
+        <div className="space-y-3">
           {horizontalWords
             .sort((a, b) => a.number - b.number)
             .map((word) => (
-              <div key={word.number} className="flex">
-                <span className="font-medium min-w-[2rem]">{word.number}.</span>
-                <span>{word.description || word.word}</span>
+              <div key={word.number} className="flex items-start">
+                <span className="font-medium w-8 flex-shrink-0">{word.number}.</span>
+                <span className="flex-1">{word.description || word.word}</span>
               </div>
             ))}
         </div>
       </div>
 
-      <div>
-        <h3 className="font-bold mb-2 text-lg">Down</h3>
-        <div className="space-y-2">
+      <div className="flex-1">
+        <h3 className="font-bold mb-4 text-lg border-b pb-2">Down</h3>
+        <div className="space-y-3">
           {verticalWords
             .sort((a, b) => a.number - b.number)
             .map((word) => (
-              <div key={word.number} className="flex">
-                <span className="font-medium min-w-[2rem]">{word.number}.</span>
-                <span>{word.description || word.word}</span>
+              <div key={word.number} className="flex items-start">
+                <span className="font-medium w-8 flex-shrink-0">{word.number}.</span>
+                <span className="flex-1">{word.description || word.word}</span>
               </div>
             ))}
         </div>
