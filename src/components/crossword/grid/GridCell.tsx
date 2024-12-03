@@ -15,6 +15,9 @@ interface GridCellProps {
   checkedWords: { [key: number]: boolean };
   onInputChange: (number: number, index: number, value: string) => void;
   onKeyDown: (wordNumber: number, word: string) => (e: React.KeyboardEvent) => void;
+  activeDirection?: 'horizontal' | 'vertical';
+  activeWordNumber?: number | null;
+  onCellFocus?: (wordNumber: number, isHorizontal: boolean) => void;
 }
 
 export const GridCell = ({
@@ -26,86 +29,53 @@ export const GridCell = ({
   userInputs,
   checkedWords,
   onInputChange,
-  onKeyDown
+  onKeyDown,
+  activeDirection = 'horizontal',
+  activeWordNumber = null,
+  onCellFocus
 }: GridCellProps) => {
   if (!cell) {
-    return (
-      <div
-        key={`${x}-${y}`}
-        className="w-8 h-8 bg-neutral-800"
-      />
-    );
+    return <div className="w-8 h-8 bg-neutral-800" />;
   }
 
   if (wordsAtCell.length === 0) {
-    return (
-      <div
-        key={`${x}-${y}`}
-        className="w-8 h-8 bg-white border border-neutral-300"
-      />
-    );
+    return <div className="w-8 h-8 bg-white border border-neutral-300" />;
   }
 
-  // Find both horizontal and vertical words at this cell
   const horizontalWord = wordsAtCell.find(word => word.position.horizontal);
   const verticalWord = wordsAtCell.find(word => !word.position.horizontal);
 
-  // Determine which word to use based on current input context
-  const primaryWord = (() => {
+  const getPrimaryWord = () => {
+    // If there's only one word, use it
     if (wordsAtCell.length === 1) return wordsAtCell[0];
-    
+
     // If we have both horizontal and vertical words
     if (horizontalWord && verticalWord) {
-      // Calculate indices for both words
-      const horizontalIndex = x - horizontalWord.position.x;
-      const verticalIndex = y - verticalWord.position.y;
-      
-      // Check if either word has started being filled
-      const isHorizontalStarted = Array.from(horizontalWord.word).some((_, idx) => {
-        const key = `${horizontalWord.number}-${idx}`;
-        return userInputs[key];
-      });
-      
-      const isVerticalStarted = Array.from(verticalWord.word).some((_, idx) => {
-        const key = `${verticalWord.number}-${idx}`;
-        return userInputs[key];
-      });
+      // If we have an active word number, use that word
+      if (activeWordNumber) {
+        const activeWord = wordsAtCell.find(w => w.number === activeWordNumber);
+        if (activeWord) return activeWord;
+      }
 
-      // If only one word has started being filled, use that one
-      if (isHorizontalStarted && !isVerticalStarted) return horizontalWord;
-      if (isVerticalStarted && !isHorizontalStarted) return verticalWord;
-      
-      // If neither word has started or both have started,
-      // check if we're at the start of either word
-      const isHorizontalStart = horizontalIndex === 0;
-      const isVerticalStart = verticalIndex === 0;
-      
-      if (isHorizontalStart && !isVerticalStart) return horizontalWord;
-      if (isVerticalStart && !isHorizontalStart) return verticalWord;
-      
-      // If we're still undecided, check which word has more filled cells
-      const horizontalFilled = Array.from(horizontalWord.word).filter((_, idx) => {
-        const key = `${horizontalWord.number}-${idx}`;
-        return userInputs[key];
-      }).length;
-      
-      const verticalFilled = Array.from(verticalWord.word).filter((_, idx) => {
-        const key = `${verticalWord.number}-${idx}`;
-        return userInputs[key];
-      }).length;
-      
-      if (horizontalFilled > verticalFilled) return horizontalWord;
-      if (verticalFilled > horizontalFilled) return verticalWord;
+      // Use the word that matches the active direction
+      return activeDirection === 'horizontal' ? horizontalWord : verticalWord;
     }
-    
-    // Default to horizontal if we can't decide
-    return horizontalWord || verticalWord;
-  })();
 
+    // Default to whatever word we have
+    return horizontalWord || verticalWord;
+  };
+
+  const primaryWord = getPrimaryWord();
   const index = primaryWord.position.horizontal
     ? x - primaryWord.position.x
     : y - primaryWord.position.y;
   const inputKey = `${primaryWord.number}-${index}`;
+
+  const handleFocus = () => {
+    if (onCellFocus) {
+      onCellFocus(primaryWord.number, primaryWord.position.horizontal);
+    }
+  };
 
   // Check all words at this cell
   const cellStates = wordsAtCell.map(word => {
@@ -131,7 +101,7 @@ export const GridCell = ({
       isWordCorrect={areAllCheckedWordsCorrect}
       onChange={(value) => onInputChange(primaryWord.number, index, value)}
       onKeyDown={onKeyDown(primaryWord.number, primaryWord.word)}
-      data-cell={`cell-${x}-${y}`}
+      onFocus={handleFocus}
     />
   );
 };

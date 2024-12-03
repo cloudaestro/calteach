@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { GridRow } from './grid/GridRow';
 
 interface CrosswordGridProps {
@@ -22,7 +22,8 @@ export const CrosswordGrid = ({
   onInputChange,
   onKeyDown
 }: CrosswordGridProps) => {
-  const currentWordRef = useRef<{ number: number; horizontal: boolean } | null>(null);
+  const [activeDirection, setActiveDirection] = useState<'horizontal' | 'vertical'>('horizontal');
+  const [activeWordNumber, setActiveWordNumber] = useState<number | null>(null);
 
   // Helper function to get all words that use a specific cell
   const getWordsAtCell = (x: number, y: number) => {
@@ -39,7 +40,7 @@ export const CrosswordGrid = ({
     });
   };
 
-  // Function to find and focus the next cell within the same word
+  // Function to find and focus the next cell
   const focusNextCell = (wordNumber: number, currentIndex: number) => {
     const word = placedWords.find(w => w.number === wordNumber);
     if (!word) return;
@@ -63,6 +64,12 @@ export const CrosswordGrid = ({
     }
   };
 
+  // Handle cell focus
+  const handleCellFocus = (wordNumber: number, isHorizontal: boolean) => {
+    setActiveWordNumber(wordNumber);
+    setActiveDirection(isHorizontal ? 'horizontal' : 'vertical');
+  };
+
   return (
     <div className="grid gap-px bg-neutral-200 w-fit mx-auto">
       {grid.map((row, y) => (
@@ -76,6 +83,9 @@ export const CrosswordGrid = ({
           onInputChange={handleInputChange}
           onKeyDown={onKeyDown}
           getWordsAtCell={getWordsAtCell}
+          activeDirection={activeDirection}
+          activeWordNumber={activeWordNumber}
+          onCellFocus={handleCellFocus}
         />
       ))}
     </div>

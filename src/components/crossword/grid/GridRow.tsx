@@ -18,6 +18,9 @@ interface GridRowProps {
     position: { x: number; y: number; horizontal: boolean };
     number: number;
   }>;
+  activeDirection?: 'horizontal' | 'vertical';
+  activeWordNumber?: number | null;
+  onCellFocus?: (wordNumber: number, isHorizontal: boolean) => void;
 }
 
 export const GridRow = ({
@@ -28,7 +31,10 @@ export const GridRow = ({
   checkedWords,
   onInputChange,
   onKeyDown,
-  getWordsAtCell
+  getWordsAtCell,
+  activeDirection,
+  activeWordNumber,
+  onCellFocus
 }: GridRowProps) => {
   return (
     <div className="flex">
@@ -50,6 +56,9 @@ export const GridRow = ({
             checkedWords={checkedWords}
             onInputChange={onInputChange}
             onKeyDown={onKeyDown}
+            activeDirection={activeDirection}
+            activeWordNumber={activeWordNumber}
+            onCellFocus={onCellFocus}
           />
         );
       })}
