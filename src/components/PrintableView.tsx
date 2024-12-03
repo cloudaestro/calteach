@@ -24,10 +24,17 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
 
         {/* Print-optimized puzzle grid */}
         <div className="flex justify-center mb-8">
-          <table cellSpacing="0" cellPadding="0" style={{ borderCollapse: 'collapse', border: '1px solid #000' }}>
+          <table 
+            style={{ 
+              borderCollapse: 'collapse',
+              border: '2px solid black',
+              tableLayout: 'fixed',
+              width: 'auto'
+            }}
+          >
             <tbody>
               {grid.map((row, y) => (
-                <tr key={y}>
+                <tr key={y} style={{ height: '30px' }}>
                   {row.map((cell, x) => {
                     const number = placedWords.find(
                       word => word.position.x === x && word.position.y === y
@@ -37,16 +44,14 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
                       <td 
                         key={`${x}-${y}`}
                         style={{
-                          width: '25px',
-                          height: '25px',
-                          border: '1px solid #000',
-                          padding: 0,
+                          width: '30px',
+                          height: '30px',
+                          border: '1px solid black',
+                          padding: '0px',
                           position: 'relative',
                           backgroundColor: cell ? 'white' : '#2C3333',
-                          minWidth: '25px',
-                          maxWidth: '25px',
-                          minHeight: '25px',
-                          maxHeight: '25px'
+                          textAlign: 'center',
+                          verticalAlign: 'middle'
                         }}
                       >
                         {cell && number && (
@@ -55,7 +60,8 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
                             top: '1px',
                             left: '1px',
                             fontSize: '8px',
-                            lineHeight: '8px'
+                            lineHeight: '8px',
+                            fontFamily: 'Arial, sans-serif'
                           }}>
                             {number}
                           </span>
