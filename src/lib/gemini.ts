@@ -10,6 +10,7 @@ export const generateWorksheet = async (prompt: string) => {
     return response.text();
   } catch (error) {
     console.error('Error generating worksheet:', error);
-    throw error;
+    // Return a fallback description if the API call fails
+    return `Description for: ${prompt.replace('Generate a short, specific clue for the word "', '').replace('" suitable for a crossword puzzle. Keep it under 10 words.', '')}`;
   }
 };
