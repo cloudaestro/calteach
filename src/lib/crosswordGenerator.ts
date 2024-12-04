@@ -10,7 +10,20 @@ import {
 } from './crosswordUtils';
 
 export const generateCrossword = async (words: string[]): Promise<CrosswordResult> => {
-  const sortedWords = words.sort((a, b) => b.length - a.length);
+  if (!words || words.length === 0) {
+    throw new Error("No words provided for crossword generation");
+  }
+
+  // Filter out empty strings and trim whitespace
+  const validWords = words
+    .filter(word => word && word.trim())
+    .map(word => word.trim().toLowerCase());
+
+  if (validWords.length === 0) {
+    throw new Error("No valid words found after filtering");
+  }
+
+  const sortedWords = validWords.sort((a, b) => b.length - a.length);
   const gridSize = Math.max(20, Math.ceil(Math.sqrt(words.join('').length * 2)));
   const grid: string[][] = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
   const placedWords: PlacedWord[] = [];
@@ -146,7 +159,7 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
   // Generate descriptions for placed words
   const wordsWithDescriptions = await Promise.all(
     placedWords.map(async (placedWord) => {
-      const descriptionPrompt = `Generate a detailed, specific clue for the word "${placedWord.word}" that would be suitable for a crossword puzzle. The clue should be challenging but fair.`;
+      const descriptionPrompt = `Generate a short, specific clue for the word "${placedWord.word}" suitable for a crossword puzzle. Keep it under 10 words.`;
       try {
         const description = await generateWorksheet(descriptionPrompt);
         return {
@@ -155,7 +168,10 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
         };
       } catch (error) {
         console.error('Error generating description:', error);
-        return placedWord;
+        return {
+          ...placedWord,
+          description: `Clue for: ${placedWord.word}`
+        };
       }
     })
   );
