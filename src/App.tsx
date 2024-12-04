@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import CrosswordGenerator from "./pages/CrosswordGenerator";
 import CrosswordPuzzle from "./pages/CrosswordPuzzle";
 import CrosswordPrint from "./pages/CrosswordPrint";
+import WorksheetList from "./pages/WorksheetList";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/worksheets" element={<WorksheetList />} />
           <Route path="/crossword" element={<CrosswordGenerator />} />
           <Route path="/crossword/:id" element={<CrosswordPuzzle />} />
           <Route path="/crossword/print/:id" element={<CrosswordPrint />} />
