@@ -73,7 +73,20 @@ export const GridCell = ({
 
   const handleFocus = () => {
     if (onCellFocus) {
-      onCellFocus(primaryWord.number, primaryWord.position.horizontal);
+      // Keep the current direction unless there's only one possible direction
+      const forceDirection = wordsAtCell.length === 1 
+        ? wordsAtCell[0].position.horizontal 
+        : undefined;
+      
+      if (forceDirection !== undefined) {
+        onCellFocus(primaryWord.number, forceDirection);
+      } else if (horizontalWord && verticalWord) {
+        // Keep the current direction if both directions are available
+        onCellFocus(primaryWord.number, activeDirection === 'horizontal');
+      } else {
+        // Use whatever direction is available
+        onCellFocus(primaryWord.number, !!horizontalWord);
+      }
     }
   };
 
@@ -102,6 +115,7 @@ export const GridCell = ({
       onChange={(value) => onInputChange(primaryWord.number, index, value)}
       onKeyDown={onKeyDown(primaryWord.number, primaryWord.word)}
       onFocus={handleFocus}
+      isPartOfCurrentWord={primaryWord.number === activeWordNumber}
     />
   );
 };
