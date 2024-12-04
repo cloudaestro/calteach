@@ -24,7 +24,6 @@ export const CrosswordGrid = ({
 }: CrosswordGridProps) => {
   const [activeDirection, setActiveDirection] = useState<'horizontal' | 'vertical'>('horizontal');
   const [activeWordNumber, setActiveWordNumber] = useState<number | null>(null);
-  const lastInteractionRef = useRef<number>(Date.now());
 
   // Helper function to get all words that use a specific cell
   const getWordsAtCell = (x: number, y: number) => {
@@ -65,15 +64,10 @@ export const CrosswordGrid = ({
     }
   };
 
-  // Handle cell focus with direction persistence
+  // Handle cell focus
   const handleCellFocus = (wordNumber: number, isHorizontal: boolean) => {
-    const now = Date.now();
-    // Only change direction if it's been more than 500ms since the last interaction
-    if (now - lastInteractionRef.current > 500) {
-      setActiveDirection(isHorizontal ? 'horizontal' : 'vertical');
-      lastInteractionRef.current = now;
-    }
     setActiveWordNumber(wordNumber);
+    setActiveDirection(isHorizontal ? 'horizontal' : 'vertical');
   };
 
   return (
