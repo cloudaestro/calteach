@@ -1,29 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { generateWorksheet } from "@/lib/gemini";
 import { generateCrossword } from "@/lib/crosswordGenerator";
-import { ArrowLeft, Save } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 
 type WordGenerationMode = "ai" | "custom";
 type DifficultyLevel = "easy" | "medium" | "hard";
 
 const CrosswordGenerator = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [mode, setMode] = useState<WordGenerationMode>("ai");
   const [topic, setTopic] = useState("");
   const [customWords, setCustomWords] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [wordCount, setWordCount] = useState(10);
-  const [currentWorksheetId, setCurrentWorksheetId] = useState<string | null>(null);
 
   const customWordsPlaceholder = 
 `dog:a faithful companion animal
@@ -59,6 +56,7 @@ bird:a feathered flying creature`;
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
+        // Parse custom words and descriptions from the new format
         const lines = customWords.split("\n").filter(line => line.trim());
         lines.forEach(line => {
           const [word, description] = line.split(":").map(part => part.trim());
@@ -76,61 +74,33 @@ bird:a feathered flying creature`;
       }));
 
       const puzzleId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const worksheetData = {
+      localStorage.setItem(`crossword-${puzzleId}`, JSON.stringify({
         grid: crosswordResult.grid,
         placedWords: enhancedPlacedWords,
         size: crosswordResult.size,
         difficulty,
-        topic: mode === "ai" ? topic : "Custom Words",
-        createdAt: new Date().toISOString()
-      };
+        topic: mode === "ai" ? topic : "Custom Words"
+      }));
 
-      localStorage.setItem(`crossword-${puzzleId}`, JSON.stringify(worksheetData));
-      setCurrentWorksheetId(puzzleId);
       navigate(`/crossword/${puzzleId}`);
     } catch (error) {
       console.error("Error generating crossword:", error);
-      toast({
-        title: "Error",
-        description: "Failed to generate crossword puzzle. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const handleSaveWorksheet = () => {
-    if (currentWorksheetId) {
-      toast({
-        title: "Worksheet Saved",
-        description: "Your worksheet has been saved successfully.",
-      });
-      navigate('/worksheets');
     }
   };
 
   return (
     <div className="min-h-screen bg-neutral-50 p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          {currentWorksheetId && (
-            <Button 
-              variant="outline"
-              onClick={handleSaveWorksheet}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save Worksheet
-            </Button>
-          )}
-        </div>
+        <Button 
+          variant="ghost" 
+          className="mb-4" 
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
         
         <Card>
           <CardHeader>
