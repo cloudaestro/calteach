@@ -22,57 +22,35 @@ export const PrintableView = ({ grid, placedWords }: PrintableViewProps) => {
 
         <h1 className="text-2xl font-bold mb-6 text-center">Crossword Puzzle</h1>
 
-        {/* Print-optimized puzzle grid */}
-        <div className="flex justify-center mb-8">
-          <table 
-            style={{ 
-              borderCollapse: 'collapse',
-              border: '2px solid black',
-              tableLayout: 'fixed',
-              width: 'auto'
-            }}
-          >
-            <tbody>
-              {grid.map((row, y) => (
-                <tr key={y} style={{ height: '30px' }}>
-                  {row.map((cell, x) => {
-                    const number = placedWords.find(
-                      word => word.position.x === x && word.position.y === y
-                    )?.number;
+        {/* Updated grid styling for perfect alignment */}
+        <div className="grid gap-0 w-fit mx-auto mb-8 border border-neutral-300">
+          {grid.map((row, y) => (
+            <div key={y} className="flex">
+              {row.map((cell, x) => {
+                const number = placedWords.find(
+                  word => word.position.x === x && word.position.y === y
+                )?.number;
 
-                    return (
-                      <td 
-                        key={`${x}-${y}`}
-                        style={{
-                          width: '30px',
-                          height: '30px',
-                          border: '1px solid black',
-                          padding: '0px',
-                          position: 'relative',
-                          backgroundColor: cell ? 'white' : '#2C3333',
-                          textAlign: 'center',
-                          verticalAlign: 'middle'
-                        }}
-                      >
-                        {cell && number && (
-                          <span style={{
-                            position: 'absolute',
-                            top: '1px',
-                            left: '1px',
-                            fontSize: '8px',
-                            lineHeight: '8px',
-                            fontFamily: 'Arial, sans-serif'
-                          }}>
-                            {number}
-                          </span>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                return cell ? (
+                  <div 
+                    key={`${x}-${y}`} 
+                    className="w-10 h-10 relative bg-white border-r border-b border-neutral-300 last:border-r-0"
+                  >
+                    {number && (
+                      <span className="absolute top-0.5 left-0.5 text-[10px] leading-none">
+                        {number}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div 
+                    key={`${x}-${y}`} 
+                    className="w-10 h-10 bg-neutral-800 border-r border-b border-neutral-300 last:border-r-0" 
+                  />
+                );
+              })}
+            </div>
+          ))}
         </div>
 
         <CrosswordClues placedWords={placedWords} />
