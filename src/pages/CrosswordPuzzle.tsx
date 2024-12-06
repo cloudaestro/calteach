@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CrosswordHeader } from "@/components/crossword/CrosswordHeader";
 import { PrintDialog } from "@/components/crossword/PrintDialog";
+import { generateCrossword } from "@/lib/crosswordGenerator";
 
 const CrosswordPuzzle = () => {
   const { id } = useParams();
@@ -27,6 +28,36 @@ const CrosswordPuzzle = () => {
       setCrosswordData(JSON.parse(data));
     }
   }, [id]);
+
+  const regenerateCrossword = async (words: string[]) => {
+    try {
+      const result = await generateCrossword(words);
+      // Keep the descriptions from the original words
+      const updatedPlacedWords = result.placedWords.map(newWord => {
+        const originalWord = crosswordData.placedWords.find(
+          (w: any) => w.word.toLowerCase() === newWord.word.toLowerCase()
+        );
+        return {
+          ...newWord,
+          description: originalWord?.description || `Description for ${newWord.word}`
+        };
+      });
+
+      setCrosswordData({
+        ...result,
+        placedWords: updatedPlacedWords
+      });
+      
+      // Reset user inputs since grid has changed
+      setUserInputs({});
+      setCheckedWords({});
+      
+      toast.success("Crossword puzzle has been regenerated!");
+    } catch (error) {
+      console.error("Error regenerating crossword:", error);
+      toast.error("Failed to regenerate crossword puzzle");
+    }
+  };
 
   const handleSave = async () => {
     if (!user) {
@@ -72,15 +103,18 @@ const CrosswordPuzzle = () => {
     }));
   };
 
-  const handleUpdateWord = (wordNumber: number, newWord: string) => {
-    setCrosswordData(prev => ({
-      ...prev,
-      placedWords: prev.placedWords.map((word: any) => 
-        word.number === wordNumber 
-          ? { ...word, word: newWord.toUpperCase() }
-          : word
-      )
-    }));
+  const handleUpdateWord = async (wordNumber: number, newWord: string) => {
+    const updatedPlacedWords = crosswordData.placedWords.map((word: any) => 
+      word.number === wordNumber 
+        ? { ...word, word: newWord.toUpperCase() }
+        : word
+    );
+
+    // Get all words for regeneration
+    const words = updatedPlacedWords.map((word: any) => word.word);
+    
+    // Regenerate crossword with updated words
+    await regenerateCrossword(words);
   };
 
   const handleAIEdit = (descriptions: string[]) => {
