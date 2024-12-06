@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CrosswordGrid } from "@/components/crossword/CrosswordGrid";
 import { CrosswordClues } from "@/components/CrosswordClues";
 import { useToast } from "@/hooks/use-toast";
-import { Printer, ArrowLeft, Save } from "lucide-react";
+import { Printer, ArrowLeft, Save, Edit2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -25,17 +25,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 const CrosswordPuzzle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { user } = useAuth();
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [crosswordData, setCrosswordData] = useState(null);
   const [userInputs, setUserInputs] = useState({});
   const [checkedWords, setCheckedWords] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const data = localStorage.getItem(`crossword-${id}`);
@@ -52,27 +53,57 @@ const CrosswordPuzzle = () => {
 
     setIsSaving(true);
     try {
+      // Save to localStorage first
+      localStorage.setItem(`crossword-${id}`, JSON.stringify(crosswordData));
+
+      // Then save to Firestore
       await addDoc(collection(db, "worksheets"), {
         userId: user.uid,
         puzzleId: id,
         title: crosswordData?.topic || "Untitled Crossword",
         createdAt: serverTimestamp(),
+        placedWords: crosswordData.placedWords,
       });
 
-      toast({
-        title: "Worksheet Saved",
-        description: "Your worksheet has been saved successfully.",
-      });
+      toast.success("Worksheet saved successfully!");
     } catch (error) {
       console.error("Error saving worksheet:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save worksheet. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to save worksheet. Please try again.");
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleUpdateDescription = (wordNumber: number, newDescription: string) => {
+    setCrosswordData(prev => ({
+      ...prev,
+      placedWords: prev.placedWords.map(word => 
+        word.number === wordNumber 
+          ? { ...word, description: newDescription }
+          : word
+      )
+    }));
+  };
+
+  const handleUpdateWord = (wordNumber: number, newWord: string) => {
+    setCrosswordData(prev => ({
+      ...prev,
+      placedWords: prev.placedWords.map(word => 
+        word.number === wordNumber 
+          ? { ...word, word: newWord.toUpperCase() }
+          : word
+      )
+    }));
+  };
+
+  const handleAIEdit = (descriptions: string[]) => {
+    setCrosswordData(prev => ({
+      ...prev,
+      placedWords: prev.placedWords.map((word, index) => ({
+        ...word,
+        description: descriptions[index] || word.description
+      }))
+    }));
   };
 
   const checkWord = (wordNumber: number, word: string) => {
@@ -109,14 +140,6 @@ const CrosswordPuzzle = () => {
     }
   };
 
-  const handleInputChange = (wordNumber: number, index: number, value: string) => {
-    const key = `${wordNumber}-${index}`;
-    setUserInputs(prev => ({
-      ...prev,
-      [key]: value.toUpperCase()
-    }));
-  };
-
   if (!crosswordData) {
     return <div>Loading...</div>;
   }
@@ -124,14 +147,23 @@ const CrosswordPuzzle = () => {
   return (
     <div className="min-h-screen bg-neutral-50 p-4">
       <div className="max-w-4xl mx-auto">
-        <Button 
-          variant="ghost" 
-          className="mb-4" 
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+        <div className="flex justify-between items-center mb-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setIsEditing(!isEditing)}
+            className={isEditing ? "bg-blue-50" : ""}
+          >
+            <Edit2 className="w-4 h-4 mr-2" />
+            {isEditing ? "Exit Edit Mode" : "Edit Mode"}
+          </Button>
+        </div>
 
         <div className="space-y-4">
           <div className="flex justify-between items-center mb-4">
@@ -182,7 +214,13 @@ const CrosswordPuzzle = () => {
             onKeyDown={handleKeyDown}
           />
 
-          <CrosswordClues placedWords={crosswordData.placedWords} />
+          <CrosswordClues 
+            placedWords={crosswordData.placedWords}
+            isEditing={isEditing}
+            onUpdateDescription={handleUpdateDescription}
+            onUpdateWord={handleUpdateWord}
+            onAIEdit={handleAIEdit}
+          />
         </div>
       </div>
 
