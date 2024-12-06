@@ -21,11 +21,8 @@ const CrosswordGenerator = () => {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [wordCount, setWordCount] = useState(10);
   const { toast } = useToast();
-
-  const customWordsPlaceholder = 
-`dogs:very good animals
-cats:another very good animals
-birds:flying animals in the sky`;
+  const [userInputs, setUserInputs] = useState<{ [key: string]: string }>({});
+  const [checkedWords, setCheckedWords] = useState<{ [key: number]: boolean }>({});
 
   const handleGenerate = async (mode: WordGenerationMode, topic: string, customWords: string) => {
     setIsGenerating(true);
@@ -61,6 +58,18 @@ birds:flying animals in the sky`;
     window.print();
   };
 
+  const handleInputChange = (number: number, index: number, value: string) => {
+    const key = `${number}-${index}`;
+    setUserInputs(prev => ({
+      ...prev,
+      [key]: value.toUpperCase()
+    }));
+  };
+
+  const handleKeyDown = (wordNumber: number, word: string) => (e: React.KeyboardEvent) => {
+    // Handle key down events if needed
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Crossword Generator</h1>
@@ -70,7 +79,14 @@ birds:flying animals in the sky`;
         </div>
         {grid.length > 0 && (
           <div>
-            <CrosswordGrid grid={grid} placedWords={placedWords} />
+            <CrosswordGrid 
+              grid={grid} 
+              placedWords={placedWords}
+              userInputs={userInputs}
+              checkedWords={checkedWords}
+              onInputChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+            />
             <CrosswordClues placedWords={placedWords} />
             <div className="mt-4 space-x-4">
               <Button onClick={handleSave}>Save</Button>
