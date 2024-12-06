@@ -24,6 +24,7 @@ const CrosswordGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [wordCount, setWordCount] = useState(10);
+  const { toast } = useToast();
 
   const customWordsPlaceholder = 
 `dog:a faithful companion animal
