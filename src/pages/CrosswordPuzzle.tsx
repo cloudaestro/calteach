@@ -4,10 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CrosswordGrid } from "@/components/crossword/CrosswordGrid";
 import { CrosswordClues } from "@/components/CrosswordClues";
 import { useToast } from "@/hooks/use-toast";
-import { Printer, ArrowLeft, Save } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { Printer, ArrowLeft } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -30,12 +27,10 @@ const CrosswordPuzzle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [crosswordData, setCrosswordData] = useState(null);
   const [userInputs, setUserInputs] = useState({});
   const [checkedWords, setCheckedWords] = useState({});
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const data = localStorage.getItem(`crossword-${id}`);
@@ -44,53 +39,29 @@ const CrosswordPuzzle = () => {
     }
   }, [id]);
 
-  const handleSave = async () => {
-    if (!user) {
-      toast({
-        title: "Please log in",
-        description: "You need to be logged in to save worksheets",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      await addDoc(collection(db, "savedWorksheets"), {
-        userId: user.uid,
-        worksheetId: id,
-        title: crosswordData?.topic || "Untitled Worksheet",
-        createdAt: serverTimestamp(),
-      });
-
-      toast({
-        title: "Success",
-        description: "Worksheet saved successfully",
-      });
-    } catch (error) {
-      console.error("Error saving worksheet:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save worksheet",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const checkWord = (wordNumber: number, word: string) => {
     const placedWord = crosswordData.placedWords.find(w => w.number === wordNumber);
     if (!placedWord) return false;
 
+    // Get all letters for this word from user inputs
     const userWord = Array.from(word).map((_, index) => {
       const inputKey = `${wordNumber}-${index}`;
       const userInput = (userInputs[inputKey] || '').trim().toLowerCase();
       return userInput;
     }).join('');
 
+    // Compare ignoring case and whitespace
     const correctWord = word.toLowerCase().trim();
     
+    console.log('Word validation:', {
+      userWord,
+      correctWord,
+      isCorrect: userWord === correctWord,
+      wordNumber,
+      position: placedWord.position,
+      inputs: userInputs
+    });
+
     return userWord === correctWord;
   };
 
@@ -141,14 +112,6 @@ const CrosswordPuzzle = () => {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Crossword Puzzle</h2>
             <div className="space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={handleSave}
-                disabled={isSaving}
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
               <Button variant="outline" onClick={() => navigate("/crossword")}>
                 Create New Puzzle
               </Button>
