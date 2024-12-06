@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Grid, BookOpen, Search, FileText, Brain, PenTool, LogOut, Save } from "lucide-react";
+import { Home, FileText, User, Mail, LogOut, Save, Grid, Search, BookOpen, Brain, PenTool } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const worksheetTypes = [
   {
@@ -46,8 +47,66 @@ const worksheetTypes = [
   }
 ];
 
+const FloatingNav = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to sign out:", error);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/80 backdrop-blur-lg rounded-full px-4 py-2 shadow-lg border border-neutral-200"
+    >
+      <button
+        onClick={() => navigate("/")}
+        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+        title="Home"
+      >
+        <Home className="w-5 h-5 text-neutral-600" />
+      </button>
+      <button
+        onClick={() => navigate("/my-worksheets")}
+        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+        title="My Work"
+      >
+        <FileText className="w-5 h-5 text-neutral-600" />
+      </button>
+      <button
+        onClick={() => navigate("/profile")}
+        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+        title="Profile"
+      >
+        <User className="w-5 h-5 text-neutral-600" />
+      </button>
+      <button
+        onClick={() => navigate("/contact")}
+        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+        title="Contact"
+      >
+        <Mail className="w-5 h-5 text-neutral-600" />
+      </button>
+      <button
+        onClick={handleSignOut}
+        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+        title="Sign Out"
+      >
+        <LogOut className="w-5 h-5 text-neutral-600" />
+      </button>
+    </motion.div>
+  );
+};
+
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   if (!user) {
@@ -61,38 +120,8 @@ const Dashboard = () => {
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      await logout();
-      navigate("/");
-    } catch (error) {
-      console.error("Failed to sign out:", error);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-neutral-50">
-      <header className="border-b bg-white/50 backdrop-blur-xl">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FileText className="w-6 h-6 text-primary" />
-            <span className="font-display font-semibold text-lg">TeachSheets AI</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-neutral-600">Welcome, {user.email}</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleSignOut}
-              className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Choose a Worksheet Type</h1>
@@ -106,7 +135,10 @@ const Dashboard = () => {
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 <Card 
-                  className={`relative overflow-hidden transition-shadow ${!type.comingSoon ? 'hover:shadow-lg cursor-pointer' : ''}`}
+                  className={cn(
+                    "relative overflow-hidden transition-shadow",
+                    !type.comingSoon && "hover:shadow-lg cursor-pointer"
+                  )}
                   onClick={() => handleWorksheetClick(type)}
                 >
                   {type.comingSoon && (
@@ -124,7 +156,10 @@ const Dashboard = () => {
                   <CardContent>
                     <button 
                       disabled={type.comingSoon}
-                      className={`w-full px-4 py-2 bg-primary text-white rounded-lg ${type.comingSoon ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}
+                      className={cn(
+                        "w-full px-4 py-2 bg-primary text-white rounded-lg",
+                        type.comingSoon ? "opacity-50 cursor-not-allowed" : "hover:bg-primary/90"
+                      )}
                     >
                       {type.title === "My Worksheets" ? "View Worksheets" : "Create Worksheet"}
                     </button>
@@ -135,6 +170,7 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
+      <FloatingNav />
     </div>
   );
 };
