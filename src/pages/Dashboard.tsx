@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Grid, BookOpen, Search, FileText, Brain, PenTool } from "lucide-react";
+import { Grid, BookOpen, Search, FileText, Brain, PenTool, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 const worksheetTypes = [
   {
@@ -45,7 +46,7 @@ const worksheetTypes = [
 ];
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   if (!user) {
@@ -59,6 +60,15 @@ const Dashboard = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to sign out:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50">
       <header className="border-b bg-white/50 backdrop-blur-xl">
@@ -69,6 +79,15 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-neutral-600">Welcome, {user.email}</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleSignOut}
+              className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>
