@@ -9,6 +9,9 @@ import { Slider } from "@/components/ui/slider";
 import { generateWorksheet } from "@/lib/gemini";
 import { generateCrossword } from "@/lib/crosswordGenerator";
 import { ArrowLeft } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 
 type WordGenerationMode = "ai" | "custom";
 type DifficultyLevel = "easy" | "medium" | "hard";
@@ -56,7 +59,6 @@ bird:a feathered flying creature`;
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
-        // Parse custom words and descriptions from the new format
         const lines = customWords.split("\n").filter(line => line.trim());
         lines.forEach(line => {
           const [word, description] = line.split(":").map(part => part.trim());
@@ -74,17 +76,47 @@ bird:a feathered flying creature`;
       }));
 
       const puzzleId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem(`crossword-${puzzleId}`, JSON.stringify({
+      const worksheetData = {
         grid: crosswordResult.grid,
         placedWords: enhancedPlacedWords,
         size: crosswordResult.size,
         difficulty,
-        topic: mode === "ai" ? topic : "Custom Words"
-      }));
+        topic: mode === "ai" ? topic : "Custom Words",
+        createdAt: new Date().toISOString(),
+        userId: auth.currentUser?.uid
+      };
+      
+      localStorage.setItem(`crossword-${puzzleId}`, JSON.stringify(worksheetData));
+
+      if (auth.currentUser) {
+        try {
+          const docRef = await addDoc(collection(db, "worksheets"), {
+            ...worksheetData,
+            createdAt: serverTimestamp(),
+          });
+          console.log("Worksheet saved with ID:", docRef.id);
+          toast({
+            title: "Success",
+            description: "Worksheet saved successfully",
+          });
+        } catch (error) {
+          console.error("Error saving worksheet:", error);
+          toast({
+            title: "Error",
+            description: "Failed to save worksheet",
+            variant: "destructive",
+          });
+        }
+      }
 
       navigate(`/crossword/${puzzleId}`);
     } catch (error) {
       console.error("Error generating crossword:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate crossword",
+        variant: "destructive",
+      });
     } finally {
       setIsGenerating(false);
     }
