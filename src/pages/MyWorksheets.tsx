@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Worksheet {
   id: string;
@@ -21,23 +22,30 @@ const MyWorksheets = () => {
 
   useEffect(() => {
     const fetchWorksheets = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       try {
+        console.log("Fetching worksheets for user:", user.uid);
         const q = query(
           collection(db, "worksheets"),
-          where("userId", "==", user.uid)
+          where("userId", "==", user.uid),
+          orderBy("createdAt", "desc")
         );
+        
         const querySnapshot = await getDocs(q);
+        console.log("Fetched worksheets:", querySnapshot.size);
+        
         const worksheetsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate()
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
         })) as Worksheet[];
 
-        setWorksheets(worksheetsData.sort((a, b) => 
-          b.createdAt.getTime() - a.createdAt.getTime()
-        ));
+        console.log("Processed worksheets:", worksheetsData);
+        setWorksheets(worksheetsData);
       } catch (error) {
         console.error("Error fetching worksheets:", error);
       } finally {
@@ -68,7 +76,11 @@ const MyWorksheets = () => {
         <h1 className="text-3xl font-bold mb-8">My Worksheets</h1>
 
         {loading ? (
-          <div>Loading...</div>
+          <div className="space-y-4">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
         ) : worksheets.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-neutral-600">No worksheets saved yet.</p>
