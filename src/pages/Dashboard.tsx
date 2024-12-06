@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Home, FileText, User, Mail, LogOut, Save, Grid, Search, BookOpen, Brain, PenTool } from "lucide-react";
+import { Grid, Search, BookOpen, Brain, PenTool, Save } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -46,64 +46,6 @@ const worksheetTypes = [
     comingSoon: true
   }
 ];
-
-const FloatingNav = () => {
-  const navigate = useNavigate();
-  const { logout } = useAuth();
-
-  const handleSignOut = async () => {
-    try {
-      await logout();
-      navigate("/");
-    } catch (error) {
-      console.error("Failed to sign out:", error);
-    }
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/80 backdrop-blur-lg rounded-full px-4 py-2 shadow-lg border border-neutral-200"
-    >
-      <button
-        onClick={() => navigate("/")}
-        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
-        title="Home"
-      >
-        <Home className="w-5 h-5 text-neutral-600" />
-      </button>
-      <button
-        onClick={() => navigate("/my-worksheets")}
-        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
-        title="My Work"
-      >
-        <FileText className="w-5 h-5 text-neutral-600" />
-      </button>
-      <button
-        onClick={() => navigate("/profile")}
-        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
-        title="Profile"
-      >
-        <User className="w-5 h-5 text-neutral-600" />
-      </button>
-      <button
-        onClick={() => navigate("/contact")}
-        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
-        title="Contact"
-      >
-        <Mail className="w-5 h-5 text-neutral-600" />
-      </button>
-      <button
-        onClick={handleSignOut}
-        className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
-        title="Sign Out"
-      >
-        <LogOut className="w-5 h-5 text-neutral-600" />
-      </button>
-    </motion.div>
-  );
-};
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -170,7 +112,6 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
-      <FloatingNav />
     </div>
   );
 };

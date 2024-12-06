@@ -8,11 +8,13 @@ import CrosswordGenerator from "./pages/CrosswordGenerator";
 import CrosswordPuzzle from "./pages/CrosswordPuzzle";
 import CrosswordPrint from "./pages/CrosswordPrint";
 import MyWorksheets from "./pages/MyWorksheets";
+import FloatingNav from "./components/FloatingNav";
 
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <FloatingNav />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
