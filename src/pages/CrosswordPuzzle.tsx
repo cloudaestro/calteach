@@ -5,12 +5,11 @@ import { CrosswordClues } from "@/components/CrosswordClues";
 import { useAuth } from "@/contexts/AuthContext";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CrosswordHeader } from "@/components/crossword/CrosswordHeader";
 import { PrintDialog } from "@/components/crossword/PrintDialog";
-import { generateCrossword } from "@/lib/crosswordGenerator";
+import { CrosswordControls } from "@/components/crossword/CrosswordControls";
+import { regenerateCrossword, checkWord } from "@/lib/crosswordHandlers";
 
 const CrosswordPuzzle = () => {
   const { id } = useParams();
@@ -28,36 +27,6 @@ const CrosswordPuzzle = () => {
       setCrosswordData(JSON.parse(data));
     }
   }, [id]);
-
-  const regenerateCrossword = async (words: string[]) => {
-    try {
-      const result = await generateCrossword(words);
-      // Keep the descriptions from the original words
-      const updatedPlacedWords = result.placedWords.map(newWord => {
-        const originalWord = crosswordData.placedWords.find(
-          (w: any) => w.word.toLowerCase() === newWord.word.toLowerCase()
-        );
-        return {
-          ...newWord,
-          description: originalWord?.description || `Description for ${newWord.word}`
-        };
-      });
-
-      setCrosswordData({
-        ...result,
-        placedWords: updatedPlacedWords
-      });
-      
-      // Reset user inputs since grid has changed
-      setUserInputs({});
-      setCheckedWords({});
-      
-      toast.success("Crossword puzzle has been regenerated!");
-    } catch (error) {
-      console.error("Error regenerating crossword:", error);
-      toast.error("Failed to regenerate crossword puzzle");
-    }
-  };
 
   const handleSave = async () => {
     if (!user) {
@@ -88,7 +57,7 @@ const CrosswordPuzzle = () => {
   const handleInputChange = (wordNumber: number, index: number, value: string) => {
     setUserInputs(prev => ({
       ...prev,
-      [`${wordNumber}-${index}`]: value
+      [`${wordNumber}-${index}`]: value.toLowerCase()
     }));
   };
 
@@ -106,15 +75,18 @@ const CrosswordPuzzle = () => {
   const handleUpdateWord = async (wordNumber: number, newWord: string) => {
     const updatedPlacedWords = crosswordData.placedWords.map((word: any) => 
       word.number === wordNumber 
-        ? { ...word, word: newWord.toUpperCase() }
+        ? { ...word, word: newWord.toLowerCase() }
         : word
     );
 
-    // Get all words for regeneration
     const words = updatedPlacedWords.map((word: any) => word.word);
+    const newCrosswordData = await regenerateCrossword(words, crosswordData.placedWords);
     
-    // Regenerate crossword with updated words
-    await regenerateCrossword(words);
+    if (newCrosswordData) {
+      setCrosswordData(newCrosswordData);
+      setUserInputs({});
+      setCheckedWords({});
+    }
   };
 
   const handleAIEdit = (descriptions: string[]) => {
@@ -129,7 +101,7 @@ const CrosswordPuzzle = () => {
 
   const handleKeyDown = (wordNumber: number, word: string) => (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      const isCorrect = checkWord(wordNumber, word);
+      const isCorrect = checkWord(wordNumber, word, userInputs);
       
       setCheckedWords(prev => ({
         ...prev,
@@ -142,18 +114,6 @@ const CrosswordPuzzle = () => {
           : "The word is not correct. Keep trying!"
       });
     }
-  };
-
-  const checkWord = (wordNumber: number, word: string) => {
-    const placedWord = crosswordData.placedWords.find((w: any) => w.number === wordNumber);
-    if (!placedWord) return false;
-
-    const userWord = Array.from(word).map((_, index) => {
-      const inputKey = `${wordNumber}-${index}`;
-      return (userInputs[inputKey] || '').trim().toLowerCase();
-    }).join('');
-
-    return userWord === word.toLowerCase().trim();
   };
 
   if (!crosswordData) {
@@ -172,27 +132,7 @@ const CrosswordPuzzle = () => {
         />
 
         <div className="space-y-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Crossword Puzzle</h2>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline">Show Answers</Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Answers</SheetTitle>
-                </SheetHeader>
-                <div className="mt-4">
-                  {crosswordData.placedWords.map((word: any, index: number) => (
-                    <div key={index} className="mb-2">
-                      <span className="font-bold">{word.number}. </span>
-                      <span>{word.word}</span>
-                    </div>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+          <CrosswordControls placedWords={crosswordData.placedWords} />
 
           <CrosswordGrid
             grid={crosswordData.grid}

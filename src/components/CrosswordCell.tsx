@@ -31,7 +31,7 @@ export const CrosswordCell = ({
   onFocus
 }: CrosswordCellProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value.slice(-1).toUpperCase();
+    const newValue = e.target.value.slice(-1).toLowerCase();
     if (newValue) {
       onChange(newValue);
     }
@@ -40,7 +40,7 @@ export const CrosswordCell = ({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Only handle alphanumeric keys
     if (/^[a-zA-Z0-9]$/.test(e.key)) {
-      const newValue = e.key.toUpperCase();
+      const newValue = e.key.toLowerCase();
       onChange(newValue);
       // Prevent default to avoid double input
       e.preventDefault();
