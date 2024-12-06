@@ -9,12 +9,18 @@ import { Slider } from "@/components/ui/slider";
 import { generateWorksheet } from "@/lib/gemini";
 import { generateCrossword } from "@/lib/crosswordGenerator";
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
+import { useToast } from "@/hooks/use-toast";
 
 type WordGenerationMode = "ai" | "custom";
 type DifficultyLevel = "easy" | "medium" | "hard";
 
 const CrosswordGenerator = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [mode, setMode] = useState<WordGenerationMode>("ai");
   const [topic, setTopic] = useState("");
   const [customWords, setCustomWords] = useState("");
@@ -41,6 +47,16 @@ bird:a feathered flying creature`;
   };
 
   const handleGenerate = async () => {
+    if (!user) {
+      toast({
+        title: "Please login",
+        description: "You need to be logged in to create worksheets",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
     setIsGenerating(true);
     try {
       let words: string[] = [];
@@ -56,7 +72,6 @@ bird:a feathered flying creature`;
         const descriptionsResponse = await generateWorksheet(descriptionsPrompt);
         descriptions = descriptionsResponse.split(";").map(desc => desc.trim());
       } else {
-        // Parse custom words and descriptions from the new format
         const lines = customWords.split("\n").filter(line => line.trim());
         lines.forEach(line => {
           const [word, description] = line.split(":").map(part => part.trim());
@@ -73,18 +88,33 @@ bird:a feathered flying creature`;
         description: descriptions[words.indexOf(word.word)] || `Enter: ${word.word}`
       }));
 
-      const puzzleId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem(`crossword-${puzzleId}`, JSON.stringify({
+      // Save to Firestore
+      const worksheetData = {
+        userId: user.uid,
+        title: `${topic || 'Custom'} Crossword`,
+        topic: topic || 'Custom Words',
+        createdAt: new Date(),
         grid: crosswordResult.grid,
         placedWords: enhancedPlacedWords,
         size: crosswordResult.size,
         difficulty,
-        topic: mode === "ai" ? topic : "Custom Words"
-      }));
+      };
 
-      navigate(`/crossword/${puzzleId}`);
+      const docRef = await addDoc(collection(db, "worksheets"), worksheetData);
+
+      toast({
+        title: "Success!",
+        description: "Worksheet saved successfully",
+      });
+
+      navigate(`/crossword/${docRef.id}`);
     } catch (error) {
       console.error("Error generating crossword:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate crossword. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsGenerating(false);
     }

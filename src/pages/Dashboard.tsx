@@ -78,6 +78,13 @@ const Dashboard = () => {
             <span className="font-display font-semibold text-lg">TeachSheets AI</span>
           </div>
           <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/my-worksheets")}
+              className="mr-4"
+            >
+              My Worksheets
+            </Button>
             <span className="text-sm text-neutral-600">Welcome, {user.email}</span>
             <Button 
               variant="ghost" 
