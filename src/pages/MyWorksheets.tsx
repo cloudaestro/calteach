@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 interface Worksheet {
   id: string;
@@ -29,10 +30,10 @@ const MyWorksheets = () => {
 
       try {
         console.log("Fetching worksheets for user:", user.uid);
+        // Remove orderBy temporarily to avoid index issues
         const q = query(
           collection(db, "worksheets"),
-          where("userId", "==", user.uid),
-          orderBy("createdAt", "desc")
+          where("userId", "==", user.uid)
         );
         
         const querySnapshot = await getDocs(q);
@@ -44,10 +45,14 @@ const MyWorksheets = () => {
           createdAt: doc.data().createdAt?.toDate() || new Date(),
         })) as Worksheet[];
 
+        // Sort on client side instead
+        worksheetsData.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
         console.log("Processed worksheets:", worksheetsData);
         setWorksheets(worksheetsData);
       } catch (error) {
         console.error("Error fetching worksheets:", error);
+        toast.error("Failed to load worksheets. Please try again later.");
       } finally {
         setLoading(false);
       }
