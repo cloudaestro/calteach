@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Grid, Search, BookOpen, Brain, PenTool, Save } from "lucide-react";
+import { Grid, Search, BookOpen, Brain, PenTool } from "lucide-react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const worksheetTypes = [
@@ -12,13 +11,6 @@ const worksheetTypes = [
     description: "Create engaging crossword puzzles",
     icon: Grid,
     path: "/crossword",
-    comingSoon: false
-  },
-  {
-    title: "My Worksheets",
-    description: "View your saved worksheets",
-    icon: Save,
-    path: "/my-worksheets",
     comingSoon: false
   },
   {
@@ -103,7 +95,7 @@ const Dashboard = () => {
                         type.comingSoon ? "opacity-50 cursor-not-allowed" : "hover:bg-primary/90"
                       )}
                     >
-                      {type.title === "My Worksheets" ? "View Worksheets" : "Create Worksheet"}
+                      Create Worksheet
                     </button>
                   </CardContent>
                 </Card>
