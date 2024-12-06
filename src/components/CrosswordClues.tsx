@@ -46,7 +46,15 @@ export const CrosswordClues = ({
             .map((word, index) => (
               <li key={`across-${word.number}-${index}`} className="text-sm">
                 <span className="font-medium mr-1">{word.number}.</span>
-                <span>{word.word}</span>
+                {isEditing && onUpdateWord ? (
+                  <EditableText
+                    text={word.word}
+                    isEditing={isEditing}
+                    onSave={(newWord) => onUpdateWord(word.number, newWord)}
+                  />
+                ) : (
+                  <span>{word.word}</span>
+                )}
                 {" - "}
                 <EditableText
                   text={word.description || ''}
@@ -68,7 +76,15 @@ export const CrosswordClues = ({
             .map((word, index) => (
               <li key={`down-${word.number}-${index}`} className="text-sm">
                 <span className="font-medium mr-1">{word.number}.</span>
-                <span>{word.word}</span>
+                {isEditing && onUpdateWord ? (
+                  <EditableText
+                    text={word.word}
+                    isEditing={isEditing}
+                    onSave={(newWord) => onUpdateWord(word.number, newWord)}
+                  />
+                ) : (
+                  <span>{word.word}</span>
+                )}
                 {" - "}
                 <EditableText
                   text={word.description || ''}
