@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Grid, BookOpen, Search, FileText, Brain, PenTool, LogOut } from "lucide-react";
+import { Grid, BookOpen, Search, FileText, Brain, PenTool, LogOut, Save } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +11,13 @@ const worksheetTypes = [
     description: "Create engaging crossword puzzles",
     icon: Grid,
     path: "/crossword",
+    comingSoon: false
+  },
+  {
+    title: "My Worksheets",
+    description: "View your saved worksheets",
+    icon: Save,
+    path: "/my-worksheets",
     comingSoon: false
   },
   {
@@ -35,12 +42,6 @@ const worksheetTypes = [
     title: "Writing",
     description: "Generate writing prompts",
     icon: PenTool,
-    comingSoon: true
-  },
-  {
-    title: "Custom",
-    description: "Create custom worksheets",
-    icon: FileText,
     comingSoon: true
   }
 ];
@@ -125,7 +126,7 @@ const Dashboard = () => {
                       disabled={type.comingSoon}
                       className={`w-full px-4 py-2 bg-primary text-white rounded-lg ${type.comingSoon ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}
                     >
-                      Create Worksheet
+                      {type.title === "My Worksheets" ? "View Worksheets" : "Create Worksheet"}
                     </button>
                   </CardContent>
                 </Card>
