@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Layout, Printer, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const features = [
   {
@@ -29,11 +32,34 @@ const features = [
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [recentWorksheets, setRecentWorksheets] = useState([]);
+
+  useEffect(() => {
+    const fetchRecentWorksheets = async () => {
+      if (!user) return;
+
+      const q = query(
+        collection(db, "savedWorksheets"),
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc"),
+        limit(3)
+      );
+
+      const querySnapshot = await getDocs(q);
+      const worksheets = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      setRecentWorksheets(worksheets);
+    };
+
+    fetchRecentWorksheets();
+  }, [user]);
 
   const handleGetStarted = () => {
     if (user) {
-      // Navigate to worksheet creator (to be implemented)
-      navigate("/create");
+      navigate("/dashboard");
     } else {
       navigate("/login");
     }
@@ -54,8 +80,8 @@ const Index = () => {
             <Link to="#" className="text-neutral-600 hover:text-neutral-800 transition-colors">
               Features
             </Link>
-            <Link to="#" className="text-neutral-600 hover:text-neutral-800 transition-colors">
-              Pricing
+            <Link to="/my-worksheets" className="text-neutral-600 hover:text-neutral-800 transition-colors">
+              My Worksheets
             </Link>
           </nav>
           <div className="flex items-center gap-4">
@@ -119,6 +145,36 @@ const Index = () => {
             </div>
           </motion.div>
         </section>
+
+        {user && recentWorksheets.length > 0 && (
+          <section className="container mx-auto px-4 py-12">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl font-bold mb-6">Recent Worksheets</h2>
+              <div className="grid gap-4">
+                {recentWorksheets.map((worksheet: any) => (
+                  <div
+                    key={worksheet.id}
+                    className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+                  >
+                    <h3 className="text-xl font-semibold mb-2">{worksheet.title}</h3>
+                    <button 
+                      onClick={() => navigate(`/crossword/${worksheet.worksheetId}`)}
+                      className="text-primary hover:text-primary-hover transition-colors"
+                    >
+                      Open Worksheet →
+                    </button>
+                  </div>
+                ))}
+                <Link 
+                  to="/my-worksheets"
+                  className="text-center text-primary hover:text-primary-hover transition-colors mt-4"
+                >
+                  View All Worksheets →
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="container mx-auto px-4 py-24 bg-neutral-50">
           <div className="max-w-6xl mx-auto">
