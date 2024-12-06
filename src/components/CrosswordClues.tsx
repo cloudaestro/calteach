@@ -23,8 +23,8 @@ export const CrosswordClues = ({ placedWords }: CrosswordCluesProps) => {
         <ul className="space-y-1">
           {placedWords
             .filter(word => word.position.horizontal)
-            .map(word => (
-              <li key={word.number} className="text-sm">
+            .map((word, index) => (
+              <li key={`across-${word.number}-${index}`} className="text-sm">
                 {word.number}. {word.description}
               </li>
             ))}
@@ -35,8 +35,8 @@ export const CrosswordClues = ({ placedWords }: CrosswordCluesProps) => {
         <ul className="space-y-1">
           {placedWords
             .filter(word => !word.position.horizontal)
-            .map(word => (
-              <li key={word.number} className="text-sm">
+            .map((word, index) => (
+              <li key={`down-${word.number}-${index}`} className="text-sm">
                 {word.number}. {word.description}
               </li>
             ))}
