@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, FileText, User, Mail, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, User, Mail, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Tooltip,
@@ -12,7 +12,7 @@ import {
 const FloatingNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -28,6 +28,17 @@ const FloatingNav = () => {
     return null;
   }
 
+  // Redirect to dashboard if user is logged in and tries to access landing page
+  if (user && location.pathname === "/") {
+    navigate("/dashboard");
+    return null;
+  }
+
+  // Don't show nav on landing page for non-logged in users
+  if (!user && location.pathname === "/") {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-6 w-full flex justify-center z-50">
       <motion.div
@@ -40,15 +51,15 @@ const FloatingNav = () => {
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/dashboard")}
                 className="p-2 hover:bg-neutral-100 rounded-full transition-all duration-200 hover:scale-110"
-                title="Home"
+                title="Dashboard"
               >
-                <Home className="w-5 h-5 text-neutral-600" />
+                <LayoutDashboard className="w-5 h-5 text-neutral-600" />
               </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Home</p>
+              <p>Dashboard</p>
             </TooltipContent>
           </Tooltip>
 
