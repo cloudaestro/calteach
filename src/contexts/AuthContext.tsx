@@ -6,7 +6,8 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  AuthError
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/components/ui/use-toast';
@@ -36,6 +37,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return unsubscribe;
   }, []);
 
+  const getErrorMessage = (error: AuthError) => {
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+      case 'auth/email-exists':
+        return "This email is already registered. Please try logging in instead.";
+      case 'auth/invalid-login-credentials':
+        return "Invalid email or password. Please check your credentials and try again.";
+      case 'auth/network-request-failed':
+        return "Network error. Please check your internet connection.";
+      case 'auth/unauthorized-domain':
+        return "This domain is not authorized for Google Sign In. Please try another method.";
+      default:
+        return error.message;
+    }
+  };
+
   const signUp = async (email: string, password: string) => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -44,10 +61,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Account created successfully!",
       });
     } catch (error: any) {
+      console.error("Signup error:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Registration Failed",
+        description: getErrorMessage(error),
       });
       throw error;
     }
@@ -61,10 +79,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Logged in successfully!",
       });
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Login Failed",
+        description: getErrorMessage(error),
       });
       throw error;
     }
@@ -79,10 +98,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Logged in with Google successfully!",
       });
     } catch (error: any) {
+      console.error("Google login error:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Google Login Failed",
+        description: getErrorMessage(error),
       });
       throw error;
     }
@@ -96,10 +116,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Logged out successfully!",
       });
     } catch (error: any) {
+      console.error("Logout error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message,
+        description: getErrorMessage(error),
       });
       throw error;
     }

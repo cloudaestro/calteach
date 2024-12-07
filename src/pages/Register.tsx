@@ -16,14 +16,24 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (password !== confirmPassword) {
       return alert("Passwords do not match");
     }
+
+    if (password.length < 6) {
+      return alert("Password must be at least 6 characters long");
+    }
+
     try {
       setLoading(true);
       await signUp(email, password);
-      navigate("/");
-    } catch (error) {
+      navigate("/dashboard");
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
+        navigate("/login");
+      }
+    } finally {
       setLoading(false);
     }
   };
@@ -44,6 +54,7 @@ export default function Register() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -54,6 +65,8 @@ export default function Register() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                minLength={6}
               />
             </div>
             <div className="space-y-2">
@@ -64,6 +77,8 @@ export default function Register() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={loading}
+                minLength={6}
               />
             </div>
           </CardContent>
@@ -73,13 +88,14 @@ export default function Register() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? "Loading..." : "Register"}
+              {loading ? "Creating Account..." : "Register"}
             </Button>
             <Button
               type="button"
               variant="outline"
               className="w-full"
               onClick={() => navigate("/login")}
+              disabled={loading}
             >
               Already have an account? Login
             </Button>
