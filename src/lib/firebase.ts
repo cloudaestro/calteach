@@ -15,3 +15,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Add more detailed console logging for debugging
+auth.onAuthStateChanged((user) => {
+  console.log("Auth state changed:", user ? "User logged in" : "User logged out");
+  if (user) {
+    console.log("User ID:", user.uid);
+  }
+});
