@@ -5,29 +5,51 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { FcGoogle } from "react-icons/fc";
+import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+
     try {
       await signIn(email, password);
       navigate("/dashboard");
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error("Login error:", error);
+      
+      // Show user-friendly error message
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Invalid email or password. Please try again or register if you don't have an account.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setIsLoading(true);
     try {
       await signInWithGoogle();
       navigate("/dashboard");
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      toast({
+        variant: "destructive",
+        title: "Google Login Failed",
+        description: "Could not sign in with Google. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,6 +71,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -58,10 +81,11 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full">
-              Sign in
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
 
@@ -79,9 +103,10 @@ const Login = () => {
             variant="outline"
             className="w-full"
             onClick={handleGoogleSignIn}
+            disabled={isLoading}
           >
             <FcGoogle className="mr-2 h-4 w-4" />
-            Sign in with Google
+            {isLoading ? "Signing in..." : "Sign in with Google"}
           </Button>
         </CardContent>
         <CardFooter>
