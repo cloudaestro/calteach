@@ -4,7 +4,7 @@ export const findIntersections = (word1: string, word2: string): [number, number
   const intersections: [number, number][] = [];
   for (let i = 0; i < word1.length; i++) {
     for (let j = 0; j < word2.length; j++) {
-      if (word1[i].toLowerCase() === word2[j].toLowerCase()) {
+      if (word1[i]?.toLowerCase() === word2[j]?.toLowerCase()) {
         intersections.push([i, j]);
       }
     }
@@ -38,9 +38,11 @@ export const calculatePosition = (
 };
 
 export const canPlaceWord = (grid: string[][], word: string, pos: Position): boolean => {
+  if (!word || !grid || !pos) return false;
+
   // Check if word fits within grid bounds
   if (pos.x < 0 || pos.y < 0 || 
-      (pos.horizontal && pos.x + word.length > grid[0].length) ||
+      (pos.horizontal && pos.x + word.length > grid[0]?.length) ||
       (!pos.horizontal && pos.y + word.length > grid.length)) {
     return false;
   }
@@ -50,8 +52,17 @@ export const canPlaceWord = (grid: string[][], word: string, pos: Position): boo
     const x = pos.horizontal ? pos.x + i : pos.x;
     const y = pos.horizontal ? pos.y : pos.y + i;
     
+    // Validate grid position exists
+    if (!grid[y] || !grid[y][x]) {
+      return false;
+    }
+
     // Check if current position conflicts with existing letters
-    if (grid[y][x] !== '' && grid[y][x].toLowerCase() !== word[i].toLowerCase()) {
+    const currentCell = grid[y][x];
+    const currentLetter = word[i];
+    
+    if (currentCell !== '' && 
+        currentCell?.toLowerCase() !== currentLetter?.toLowerCase()) {
       return false;
     }
 
@@ -80,6 +91,9 @@ export const canPlaceWord = (grid: string[][], word: string, pos: Position): boo
 
 // Helper function to check if adjacent cell placement is valid
 const isValidAdjacent = (grid: string[][], x: number, y: number, isHorizontal: boolean): boolean => {
+  // Validate grid position exists
+  if (!grid[y] || grid[y][x] === undefined) return false;
+
   // An adjacent cell is valid if it's empty or if it's part of an intersecting word
   const isEmpty = grid[y][x] === '';
   if (isEmpty) return true;
@@ -88,27 +102,34 @@ const isValidAdjacent = (grid: string[][], x: number, y: number, isHorizontal: b
   // For horizontal words, check vertical neighbors
   // For vertical words, check horizontal neighbors
   const hasValidIntersection = isHorizontal
-    ? (y > 0 && grid[y-1][x] !== '') || (y < grid.length - 1 && grid[y+1][x] !== '')
-    : (x > 0 && grid[y][x-1] !== '') || (x < grid[0].length - 1 && grid[y][x+1] !== '');
+    ? (y > 0 && grid[y-1]?.[x] !== '') || (y < grid.length - 1 && grid[y+1]?.[x] !== '')
+    : (x > 0 && grid[y]?.[x-1] !== '') || (x < grid[0].length - 1 && grid[y]?.[x+1] !== '');
 
   return hasValidIntersection;
 };
 
 export const placeWord = (grid: string[][], word: string, pos: Position): void => {
+  if (!word || !grid || !pos) return;
+  
   for (let i = 0; i < word.length; i++) {
     const x = pos.horizontal ? pos.x + i : pos.x;
     const y = pos.horizontal ? pos.y : pos.y + i;
-    grid[y][x] = word[i];
+    if (grid[y] && grid[y][x] !== undefined) {
+      grid[y][x] = word[i];
+    }
   }
 };
 
 export const countIntersections = (grid: string[][], word: string, pos: Position): number => {
+  if (!word || !grid || !pos) return 0;
+  
   let count = 0;
   for (let i = 0; i < word.length; i++) {
     const x = pos.horizontal ? pos.x + i : pos.x;
     const y = pos.horizontal ? pos.y : pos.y + i;
     
-    if (grid[y][x] !== '' && grid[y][x].toLowerCase() === word[i].toLowerCase()) {
+    if (grid[y]?.[x] !== '' && 
+        grid[y]?.[x]?.toLowerCase() === word[i]?.toLowerCase()) {
       count++;
     }
   }
@@ -120,6 +141,8 @@ export const findAdjacentPositions = (
   placedWord: { word: string; position: Position },
   newWordLength: number
 ): Position[] => {
+  if (!grid || !placedWord || !placedWord.word || !placedWord.position) return [];
+  
   const positions: Position[] = [];
   const { word, position: { x, y, horizontal } } = placedWord;
   
