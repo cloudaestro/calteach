@@ -21,7 +21,7 @@ import {
 interface Worksheet {
   id: string;
   title: string;
-  created_at: Date;
+  created_at: string;
   puzzle_id: string;
 }
 
@@ -54,7 +54,7 @@ const MyWorksheets = () => {
           return {
             id: doc.id,
             title: doc.title || "Untitled",
-            created_at: new Date(doc.created_at),
+            created_at: doc.created_at,
             puzzle_id: doc.puzzle_id || "",
           };
         }) || [];
@@ -136,7 +136,7 @@ const MyWorksheets = () => {
                   <div>
                     <h3 className="font-semibold mb-2">{worksheet.title}</h3>
                     <p className="text-sm text-neutral-600">
-                      Created: {worksheet.created_at.toLocaleDateString()}
+                      Created: {new Date(worksheet.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="flex gap-2">
