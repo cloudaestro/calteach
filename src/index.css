@@ -96,5 +96,8 @@
     page-break-inside: avoid !important;
     max-height: calc(100vh - 200px) !important;
     overflow: hidden !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 2rem !important;
   }
 }

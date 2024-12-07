@@ -40,102 +40,64 @@ export const CrosswordClues = ({
           />
         </div>
       )}
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:grid-cols-2 description-container">
         <div>
           <h4 className="font-medium mb-4">Across:</h4>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <h5 className="text-sm font-medium text-gray-600">Descriptions</h5>
-              <ul className="space-y-2">
-                {placedWords
-                  .filter(word => word.position.horizontal)
-                  .map((word, index) => (
-                    <li key={`across-desc-${word.number}-${index}`} className="text-sm flex">
-                      <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
+          <div className="space-y-2">
+            <ul className="space-y-2">
+              {placedWords
+                .filter(word => word.position.horizontal)
+                .map((word, index) => (
+                  <li key={`across-desc-${word.number}-${index}`} className="text-sm flex">
+                    <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
+                    <EditableText
+                      text={word.description || ''}
+                      isEditing={isEditing}
+                      multiline
+                      onSave={(newDescription) => 
+                        onUpdateDescription?.(word.number, newDescription)
+                      }
+                    />
+                    {showAnswers && isEditing && onUpdateWord && (
                       <EditableText
-                        text={word.description || ''}
+                        text={word.word}
                         isEditing={isEditing}
-                        multiline
-                        onSave={(newDescription) => 
-                          onUpdateDescription?.(word.number, newDescription)
-                        }
+                        onSave={(newWord) => onUpdateWord(word.number, newWord)}
                       />
-                    </li>
-                  ))}
-              </ul>
-            </div>
-            {showAnswers && (
-              <div className="space-y-2">
-                <h5 className="text-sm font-medium text-gray-600">Answers</h5>
-                <ul className="space-y-2">
-                  {placedWords
-                    .filter(word => word.position.horizontal)
-                    .map((word, index) => (
-                      <li key={`across-ans-${word.number}-${index}`} className="text-sm flex">
-                        <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
-                        {isEditing && onUpdateWord ? (
-                          <EditableText
-                            text={word.word}
-                            isEditing={isEditing}
-                            onSave={(newWord) => onUpdateWord(word.number, newWord)}
-                          />
-                        ) : (
-                          <span>{word.word}</span>
-                        )}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
+                    )}
+                  </li>
+                ))}
+            </ul>
           </div>
         </div>
 
         <div>
           <h4 className="font-medium mb-4">Down:</h4>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <h5 className="text-sm font-medium text-gray-600">Descriptions</h5>
-              <ul className="space-y-2">
-                {placedWords
-                  .filter(word => !word.position.horizontal)
-                  .map((word, index) => (
-                    <li key={`down-desc-${word.number}-${index}`} className="text-sm flex">
-                      <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
+          <div className="space-y-2">
+            <ul className="space-y-2">
+              {placedWords
+                .filter(word => !word.position.horizontal)
+                .map((word, index) => (
+                  <li key={`down-desc-${word.number}-${index}`} className="text-sm flex">
+                    <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
+                    <EditableText
+                      text={word.description || ''}
+                      isEditing={isEditing}
+                      multiline
+                      onSave={(newDescription) => 
+                        onUpdateDescription?.(word.number, newDescription)
+                      }
+                    />
+                    {showAnswers && isEditing && onUpdateWord && (
                       <EditableText
-                        text={word.description || ''}
+                        text={word.word}
                         isEditing={isEditing}
-                        multiline
-                        onSave={(newDescription) => 
-                          onUpdateDescription?.(word.number, newDescription)
-                        }
+                        onSave={(newWord) => onUpdateWord(word.number, newWord)}
                       />
-                    </li>
-                  ))}
-              </ul>
-            </div>
-            {showAnswers && (
-              <div className="space-y-2">
-                <h5 className="text-sm font-medium text-gray-600">Answers</h5>
-                <ul className="space-y-2">
-                  {placedWords
-                    .filter(word => !word.position.horizontal)
-                    .map((word, index) => (
-                      <li key={`down-ans-${word.number}-${index}`} className="text-sm flex">
-                        <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
-                        {isEditing && onUpdateWord ? (
-                          <EditableText
-                            text={word.word}
-                            isEditing={isEditing}
-                            onSave={(newWord) => onUpdateWord(word.number, newWord)}
-                          />
-                        ) : (
-                          <span>{word.word}</span>
-                        )}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
+                    )}
+                  </li>
+                ))}
+            </ul>
           </div>
         </div>
       </div>
