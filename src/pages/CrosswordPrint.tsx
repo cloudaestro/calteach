@@ -65,7 +65,10 @@ const CrosswordPrint = () => {
               onKeyDown={() => () => {}}
             />
 
-            <CrosswordClues placedWords={crosswordData.placedWords} />
+            <CrosswordClues 
+              placedWords={crosswordData.placedWords}
+              showAnswers={showAnswers}
+            />
 
             <div className="text-center text-sm text-gray-500 print:mt-8">
               © {new Date().getFullYear()} TeachSheets AI

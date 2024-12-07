@@ -19,6 +19,7 @@ interface CrosswordCluesProps {
   onUpdateDescription?: (wordNumber: number, newDescription: string) => void;
   onUpdateWord?: (wordNumber: number, newWord: string) => void;
   onAIEdit?: (descriptions: string[]) => void;
+  showAnswers?: boolean;
 }
 
 export const CrosswordClues = ({ 
@@ -27,6 +28,7 @@ export const CrosswordClues = ({
   onUpdateDescription,
   onUpdateWord,
   onAIEdit,
+  showAnswers = false,
 }: CrosswordCluesProps) => {
   return (
     <div className="mt-6 space-y-4">
@@ -62,27 +64,29 @@ export const CrosswordClues = ({
                   ))}
               </ul>
             </div>
-            <div className="space-y-2">
-              <h5 className="text-sm font-medium text-gray-600">Answers</h5>
-              <ul className="space-y-2">
-                {placedWords
-                  .filter(word => word.position.horizontal)
-                  .map((word, index) => (
-                    <li key={`across-ans-${word.number}-${index}`} className="text-sm flex">
-                      <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
-                      {isEditing && onUpdateWord ? (
-                        <EditableText
-                          text={word.word}
-                          isEditing={isEditing}
-                          onSave={(newWord) => onUpdateWord(word.number, newWord)}
-                        />
-                      ) : (
-                        <span>{word.word}</span>
-                      )}
-                    </li>
-                  ))}
-              </ul>
-            </div>
+            {showAnswers && (
+              <div className="space-y-2">
+                <h5 className="text-sm font-medium text-gray-600">Answers</h5>
+                <ul className="space-y-2">
+                  {placedWords
+                    .filter(word => word.position.horizontal)
+                    .map((word, index) => (
+                      <li key={`across-ans-${word.number}-${index}`} className="text-sm flex">
+                        <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
+                        {isEditing && onUpdateWord ? (
+                          <EditableText
+                            text={word.word}
+                            isEditing={isEditing}
+                            onSave={(newWord) => onUpdateWord(word.number, newWord)}
+                          />
+                        ) : (
+                          <span>{word.word}</span>
+                        )}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
@@ -109,27 +113,29 @@ export const CrosswordClues = ({
                   ))}
               </ul>
             </div>
-            <div className="space-y-2">
-              <h5 className="text-sm font-medium text-gray-600">Answers</h5>
-              <ul className="space-y-2">
-                {placedWords
-                  .filter(word => !word.position.horizontal)
-                  .map((word, index) => (
-                    <li key={`down-ans-${word.number}-${index}`} className="text-sm flex">
-                      <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
-                      {isEditing && onUpdateWord ? (
-                        <EditableText
-                          text={word.word}
-                          isEditing={isEditing}
-                          onSave={(newWord) => onUpdateWord(word.number, newWord)}
-                        />
-                      ) : (
-                        <span>{word.word}</span>
-                      )}
-                    </li>
-                  ))}
-              </ul>
-            </div>
+            {showAnswers && (
+              <div className="space-y-2">
+                <h5 className="text-sm font-medium text-gray-600">Answers</h5>
+                <ul className="space-y-2">
+                  {placedWords
+                    .filter(word => !word.position.horizontal)
+                    .map((word, index) => (
+                      <li key={`down-ans-${word.number}-${index}`} className="text-sm flex">
+                        <span className="font-medium mr-2 min-w-[20px]">{word.number}.</span>
+                        {isEditing && onUpdateWord ? (
+                          <EditableText
+                            text={word.word}
+                            isEditing={isEditing}
+                            onSave={(newWord) => onUpdateWord(word.number, newWord)}
+                          />
+                        ) : (
+                          <span>{word.word}</span>
+                        )}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>
