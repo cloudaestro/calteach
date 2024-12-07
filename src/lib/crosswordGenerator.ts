@@ -10,8 +10,20 @@ import {
 } from './crosswordUtils';
 
 export const generateCrossword = async (words: string[]): Promise<CrosswordResult> => {
-  const sortedWords = words.sort((a, b) => b.length - a.length);
-  const gridSize = Math.max(20, Math.ceil(Math.sqrt(words.join('').length * 2)));
+  // Validate input
+  if (!words || words.length === 0) {
+    throw new Error("No words provided for crossword generation");
+  }
+
+  // Filter out any invalid words
+  const validWords = words.filter(word => word && typeof word === 'string' && word.trim().length > 0);
+  
+  if (validWords.length === 0) {
+    throw new Error("No valid words provided for crossword generation");
+  }
+
+  const sortedWords = validWords.sort((a, b) => b.length - a.length);
+  const gridSize = Math.max(20, Math.ceil(Math.sqrt(validWords.join('').length * 2)));
   const grid: string[][] = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
   const placedWords: PlacedWord[] = [];
   
@@ -33,13 +45,15 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
   let forceHorizontal = false;
   for (let i = 1; i < sortedWords.length; i++) {
     const word = sortedWords[i];
+    if (!word) continue; // Skip if word is undefined
+
     let bestPlacement: { pos: Position; intersections: number } | null = null;
     
     // First try to find intersections with existing words
     for (const placedWord of placedWords) {
-      const intersections = findIntersections(word, placedWord.word);
+      if (!placedWord || !placedWord.word) continue; // Skip if placed word is invalid
       
-      // Try placing in opposite orientation of the previous word
+      const intersections = findIntersections(word, placedWord.word);
       const horizontal = !placedWord.position.horizontal;
       
       for (const [newWordIndex, placedWordIndex] of intersections) {
@@ -62,8 +76,10 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
 
     // If no intersections found, try adjacent positions
     if (!bestPlacement) {
-      forceHorizontal = !forceHorizontal; // Alternate orientation
+      forceHorizontal = !forceHorizontal;
       for (const placedWord of placedWords) {
+        if (!placedWord || !placedWord.word) continue;
+        
         const adjacentPositions = findAdjacentPositions(grid, placedWord, word.length);
         for (const pos of adjacentPositions.filter(p => p.horizontal === forceHorizontal)) {
           if (canPlaceWord(grid, word, pos)) {
@@ -109,13 +125,13 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
     }
   }
 
-  // Reassign numbers based on position in grid (top to bottom, left to right)
+  // Reassign numbers based on position in grid
   const numberedPositions = new Set<string>();
   let currentNumber = 1;
 
-  // First pass: collect all positions that need numbers
   const positionsNeedingNumbers: Array<{ x: number; y: number }> = [];
   placedWords.forEach(word => {
+    if (!word || !word.position) return;
     const key = `${word.position.x},${word.position.y}`;
     if (!numberedPositions.has(key)) {
       positionsNeedingNumbers.push({ x: word.position.x, y: word.position.y });
@@ -123,7 +139,6 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
     }
   });
 
-  // Sort positions by y first (top to bottom), then x (left to right)
   positionsNeedingNumbers.sort((a, b) => {
     if (a.y === b.y) {
       return a.x - b.x;
@@ -131,14 +146,13 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
     return a.y - b.y;
   });
 
-  // Create a mapping of positions to numbers
   const positionToNumber = new Map<string, number>();
   positionsNeedingNumbers.forEach(pos => {
     positionToNumber.set(`${pos.x},${pos.y}`, currentNumber++);
   });
 
-  // Update word numbers based on their starting position
   placedWords.forEach(word => {
+    if (!word || !word.position) return;
     const key = `${word.position.x},${word.position.y}`;
     word.number = positionToNumber.get(key) || word.number;
   });
@@ -146,6 +160,8 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
   // Generate descriptions for placed words
   const wordsWithDescriptions = await Promise.all(
     placedWords.map(async (placedWord) => {
+      if (!placedWord || !placedWord.word) return placedWord;
+      
       const descriptionPrompt = `Generate a detailed, specific clue for the word "${placedWord.word}" that would be suitable for a crossword puzzle. The clue should be challenging but fair.`;
       try {
         const description = await generateWorksheet(descriptionPrompt);
@@ -162,7 +178,7 @@ export const generateCrossword = async (words: string[]): Promise<CrosswordResul
 
   return {
     grid,
-    placedWords: wordsWithDescriptions,
+    placedWords: wordsWithDescriptions.filter(word => word && word.word),
     size: gridSize
   };
 };
