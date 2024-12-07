@@ -74,6 +74,10 @@
   .print\:mt-8 {
     margin-top: 2rem !important;
   }
+
+  .print\:mt-16 {
+    margin-top: 4rem !important;
+  }
   
   .print\:space-y-4 > * + * {
     margin-top: 1rem !important;
@@ -81,5 +85,9 @@
   
   .print\:max-w-none {
     max-width: none !important;
+  }
+
+  .print\:page-break-before {
+    page-break-before: always !important;
   }
 }
