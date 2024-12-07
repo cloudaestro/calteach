@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileText, User, Mail, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, User, ArrowLeft, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Tooltip,
@@ -51,6 +51,21 @@ const FloatingNav = () => {
           <Tooltip>
             <TooltipTrigger asChild>
               <button
+                onClick={() => navigate(-1)}
+                className="p-2 hover:bg-neutral-100 rounded-full transition-all duration-200 hover:scale-110"
+                title="Back"
+              >
+                <ArrowLeft className="w-5 h-5 text-neutral-600" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Back</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
                 onClick={() => navigate("/dashboard")}
                 className="p-2 hover:bg-neutral-100 rounded-full transition-all duration-200 hover:scale-110"
                 title="Dashboard"
@@ -90,21 +105,6 @@ const FloatingNav = () => {
             </TooltipTrigger>
             <TooltipContent>
               <p>Profile</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => navigate("/contact")}
-                className="p-2 hover:bg-neutral-100 rounded-full transition-all duration-200 hover:scale-110"
-                title="Contact"
-              >
-                <Mail className="w-5 h-5 text-neutral-600" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Contact</p>
             </TooltipContent>
           </Tooltip>
 
