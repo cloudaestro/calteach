@@ -3,95 +3,91 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { FcGoogle } from "react-icons/fc";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { ArrowRight } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn, signInWithGoogle } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      await signIn(email, password);
+      await login(email, password);
       navigate("/dashboard");
     } catch (error) {
-      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to login. Please check your credentials.",
+      });
     }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-      navigate("/dashboard");
-    } catch (error) {
-      console.error(error);
-    }
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-          <CardDescription>
-            Enter your email and password to access your account
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md animate-fade-up">
+        <CardHeader className="space-y-2 text-center">
+          <CardTitle className="text-2xl font-display font-semibold text-neutral-800">
+            Welcome back
+          </CardTitle>
+          <CardDescription className="text-neutral-500">
+            Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium text-neutral-700">
+                Email
+              </label>
               <Input
+                id="email"
                 type="email"
-                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full"
                 required
               />
             </div>
             <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium text-neutral-700">
+                Password
+              </label>
               <Input
+                id="password"
                 type="password"
-                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full"
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
-              Sign in
+            <Button
+              type="submit"
+              className="w-full bg-primary hover:bg-primary-hover text-white transition-colors"
+              disabled={loading}
+            >
+              {loading ? (
+                "Logging in..."
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
             </Button>
           </form>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-neutral-500">Or</span>
-            </div>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleSignIn}
-          >
-            <FcGoogle className="mr-2 h-4 w-4" />
-            Sign in with Google
-          </Button>
         </CardContent>
-        <CardFooter>
-          <p className="text-sm text-neutral-600">
-            Don't have an account?{" "}
-            <a href="/register" className="text-primary hover:underline">
-              Sign up
-            </a>
-          </p>
-        </CardFooter>
       </Card>
     </div>
   );
