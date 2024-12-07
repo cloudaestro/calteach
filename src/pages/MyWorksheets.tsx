@@ -33,26 +33,23 @@ const MyWorksheets = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let isMounted = true;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     const fetchWorksheets = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
       try {
-        console.log("Starting to fetch worksheets for user:", user.uid);
+        console.log("Starting worksheet fetch for user:", user.uid);
         const worksheetsRef = collection(db, "worksheets");
         const q = query(worksheetsRef, where("userId", "==", user.uid));
         
         const querySnapshot = await getDocs(q);
-        console.log("Query completed, number of documents:", querySnapshot.size);
-        
-        if (!isMounted) return;
+        console.log("Query completed, documents found:", querySnapshot.size);
 
         const worksheetsData = querySnapshot.docs.map(doc => {
           const data = doc.data();
+          console.log("Processing document:", doc.id, data);
           return {
             id: doc.id,
             title: data.title || "Untitled",
@@ -61,32 +58,22 @@ const MyWorksheets = () => {
           };
         });
 
-        worksheetsData.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-        console.log("Processed worksheets data:", worksheetsData);
-        
+        console.log("Processed worksheet data:", worksheetsData);
         setWorksheets(worksheetsData);
       } catch (error) {
         console.error("Error fetching worksheets:", error);
-        if (isMounted) {
-          toast.error("Failed to load worksheets. Please try again later.");
-        }
+        toast.error("Failed to load worksheets. Please try again later.");
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     fetchWorksheets();
-
-    return () => {
-      isMounted = false;
-    };
   }, [user]);
 
   const handleDelete = async (worksheetId: string) => {
     try {
-      console.log("Attempting to delete worksheet:", worksheetId);
+      console.log("Deleting worksheet:", worksheetId);
       await deleteDoc(doc(db, "worksheets", worksheetId));
       setWorksheets(prev => prev.filter(worksheet => worksheet.id !== worksheetId));
       toast.success("Worksheet deleted successfully");
@@ -141,7 +128,7 @@ const MyWorksheets = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-semibold mb-2">{worksheet.title}</h3>
-                    <p className="text-sm text-neutral-600 mb-4">
+                    <p className="text-sm text-neutral-600">
                       Created: {worksheet.createdAt.toLocaleDateString()}
                     </p>
                   </div>
