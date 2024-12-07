@@ -44,7 +44,7 @@ const CrosswordPrint = () => {
       </div>
 
       {/* First Page - Worksheet */}
-      <div className="p-8 print:p-0 page">
+      <div className="p-8 print:p-0">
         <div className="max-w-4xl mx-auto print:max-w-none">
           <div className="space-y-8 print:space-y-4">
             {/* Watermark */}
@@ -76,7 +76,7 @@ const CrosswordPrint = () => {
 
       {/* Second Page - Answer Sheet (only if showAnswers is true) */}
       {showAnswers && (
-        <div className="print:page-break-before print:mt-16">
+        <div className="page-break-before-always">
           <AnswerSheet placedWords={crosswordData.placedWords} />
         </div>
       )}
