@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,8 +21,8 @@ import {
 interface Worksheet {
   id: string;
   title: string;
-  createdAt: Date;
-  puzzleId: string;
+  created_at: Date;
+  puzzle_id: string;
 }
 
 const MyWorksheets = () => {
@@ -40,23 +39,25 @@ const MyWorksheets = () => {
 
     const fetchWorksheets = async () => {
       try {
-        console.log("Starting worksheet fetch for user:", user.uid);
-        const worksheetsRef = collection(db, "worksheets");
-        const q = query(worksheetsRef, where("userId", "==", user.uid));
-        
-        const querySnapshot = await getDocs(q);
-        console.log("Query completed, documents found:", querySnapshot.size);
+        console.log("Starting worksheet fetch for user:", user.id);
+        const { data, error } = await supabase
+          .from('worksheets')
+          .select('*')
+          .eq('user_id', user.id);
 
-        const worksheetsData = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          console.log("Processing document:", doc.id, data);
+        if (error) throw error;
+        
+        console.log("Query completed, documents found:", data?.length);
+        
+        const worksheetsData = data?.map(doc => {
+          console.log("Processing document:", doc.id, doc);
           return {
             id: doc.id,
-            title: data.title || "Untitled",
-            createdAt: data.createdAt?.toDate() || new Date(),
-            puzzleId: data.puzzleId || "",
+            title: doc.title || "Untitled",
+            created_at: new Date(doc.created_at),
+            puzzle_id: doc.puzzle_id || "",
           };
-        });
+        }) || [];
 
         console.log("Processed worksheet data:", worksheetsData);
         setWorksheets(worksheetsData);
@@ -74,7 +75,13 @@ const MyWorksheets = () => {
   const handleDelete = async (worksheetId: string) => {
     try {
       console.log("Deleting worksheet:", worksheetId);
-      await deleteDoc(doc(db, "worksheets", worksheetId));
+      const { error } = await supabase
+        .from('worksheets')
+        .delete()
+        .eq('id', worksheetId);
+
+      if (error) throw error;
+
       setWorksheets(prev => prev.filter(worksheet => worksheet.id !== worksheetId));
       toast.success("Worksheet deleted successfully");
     } catch (error) {
@@ -129,12 +136,12 @@ const MyWorksheets = () => {
                   <div>
                     <h3 className="font-semibold mb-2">{worksheet.title}</h3>
                     <p className="text-sm text-neutral-600">
-                      Created: {worksheet.createdAt.toLocaleDateString()}
+                      Created: {worksheet.created_at.toLocaleDateString()}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => navigate(`/crossword/${worksheet.puzzleId}`)}
+                      onClick={() => navigate(`/crossword/${worksheet.puzzle_id}`)}
                     >
                       Open Worksheet
                     </Button>

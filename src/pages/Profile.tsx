@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { User, updateProfile } from "firebase/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [displayName, setDisplayName] = useState(user?.user_metadata?.full_name || "");
   const [isEditing, setIsEditing] = useState(false);
 
   if (!user) {
@@ -21,10 +21,12 @@ const Profile = () => {
 
   const handleUpdateProfile = async () => {
     try {
-      console.log("Updating profile for user:", user.uid);
-      await updateProfile(user as User, {
-        displayName: displayName,
+      console.log("Updating profile for user:", user.id);
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: displayName }
       });
+      
+      if (error) throw error;
       
       toast({
         title: "Success",
@@ -88,7 +90,7 @@ const Profile = () => {
               <div>
                 <h3 className="text-sm font-medium mb-2">Account Created</h3>
                 <Input
-                  value={user.metadata.creationTime || "Unknown"}
+                  value={new Date(user.created_at || "").toLocaleString()}
                   disabled
                 />
               </div>

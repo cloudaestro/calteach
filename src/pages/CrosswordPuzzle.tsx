@@ -3,8 +3,7 @@ import { useParams } from "react-router-dom";
 import { CrosswordGrid } from "@/components/crossword/CrosswordGrid";
 import { CrosswordClues } from "@/components/CrosswordClues";
 import { useAuth } from "@/contexts/AuthContext";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CrosswordHeader } from "@/components/crossword/CrosswordHeader";
 import { PrintDialog } from "@/components/crossword/PrintDialog";
@@ -38,12 +37,16 @@ const CrosswordPuzzle = () => {
     try {
       localStorage.setItem(`crossword-${id}`, JSON.stringify(crosswordData));
 
-      await addDoc(collection(db, "worksheets"), {
-        userId: user.uid,
-        puzzleId: id,
-        createdAt: serverTimestamp(),
-        placedWords: crosswordData.placedWords,
-      });
+      const { error } = await supabase
+        .from('worksheets')
+        .insert({
+          user_id: user.id,
+          puzzle_id: id,
+          created_at: new Date().toISOString(),
+          placed_words: crosswordData.placedWords
+        });
+
+      if (error) throw error;
 
       toast.success("Worksheet saved successfully!");
     } catch (error) {
