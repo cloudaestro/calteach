@@ -40,7 +40,7 @@ const FloatingNav = () => {
   }
 
   return (
-    <div className="fixed bottom-6 w-full flex justify-center z-50">
+    <div className="fixed bottom-6 w-full flex justify-center z-50 print:hidden">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}

@@ -90,4 +90,11 @@
   .print\:page-break-before {
     page-break-before: always !important;
   }
+
+  /* Adjust description layout for single page */
+  .description-container {
+    page-break-inside: avoid !important;
+    max-height: calc(100vh - 200px) !important;
+    overflow: hidden !important;
+  }
 }
