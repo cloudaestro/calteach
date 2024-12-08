@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileText, User, ArrowLeft, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, User, ArrowLeft, LogOut, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Tooltip,
@@ -90,6 +90,21 @@ const FloatingNav = () => {
             </TooltipTrigger>
             <TooltipContent>
               <p>My Worksheets</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => navigate("/pricing")}
+                className="p-2 hover:bg-neutral-100 rounded-full transition-all duration-200 hover:scale-110"
+                title="Pricing"
+              >
+                <CreditCard className="w-5 h-5 text-neutral-600" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Pricing</p>
             </TooltipContent>
           </Tooltip>
 
