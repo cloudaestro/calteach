@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { FcGoogle } from "react-icons/fc";
 import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -18,6 +20,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setEmailNotConfirmed(false);
 
     try {
       await signIn(email, password);
@@ -25,12 +28,21 @@ const Login = () => {
     } catch (error: any) {
       console.error("Login error:", error);
       
-      // Show user-friendly error message
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: "Invalid email or password. Please try again or register if you don't have an account.",
-      });
+      // Check if the error is due to unconfirmed email
+      if (error.message.includes("Email not confirmed")) {
+        setEmailNotConfirmed(true);
+        toast({
+          variant: "destructive",
+          title: "Email Not Confirmed",
+          description: "Please check your email and confirm your account before logging in.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: "Invalid email or password. Please try again or register if you don't have an account.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -63,6 +75,15 @@ const Login = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {emailNotConfirmed && (
+            <Alert className="mb-4">
+              <AlertDescription>
+                Please check your email and confirm your account before logging in.
+                If you haven't received the email, you may need to check your spam folder.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Input
