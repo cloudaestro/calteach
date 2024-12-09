@@ -53,24 +53,16 @@ const Pricing = () => {
     }
 
     try {
-      const response = await fetch(
-        'https://mccfjtfmqagnrjzsoevq.supabase.co/functions/v1/create-checkout',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-          },
-          body: JSON.stringify({
-            priceId,
-            customerId: user.id
-          })
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          priceId,
+          customerId: user.id
         }
-      );
+      });
 
-      const { url } = await response.json();
-      if (url) {
-        window.location.href = url;
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
       }
     } catch (error) {
       console.error('Error:', error);
