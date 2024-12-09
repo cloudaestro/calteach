@@ -8,7 +8,7 @@ const tiers = [
   {
     name: "Basic",
     price: "$19",
-    priceId: "price_XXXXX", // Replace with your Stripe price ID
+    priceId: "price_1QTrrzB91imUhK3FMmednRAv", // Replace with your Stripe price ID
     features: [
       "Create up to 10 worksheets",
       "Basic crossword templates",
@@ -19,7 +19,7 @@ const tiers = [
   {
     name: "Pro",
     price: "$49",
-    priceId: "price_XXXXX", // Replace with your Stripe price ID
+    priceId: "price_1QTrsdB91imUhK3FIZymm7bN", // Replace with your Stripe price ID
     features: [
       "Create unlimited worksheets",
       "Advanced crossword templates",
@@ -31,7 +31,7 @@ const tiers = [
   {
     name: "Enterprise",
     price: "$99",
-    priceId: "price_XXXXX", // Replace with your Stripe price ID
+    priceId: "price_1QTrt5B91imUhK3FaW5Frou1", // Replace with your Stripe price ID
     features: [
       "Everything in Pro",
       "School-wide license",
